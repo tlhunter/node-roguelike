@@ -45,6 +45,9 @@ class MazeKeyGen {
     const d2 = this.addDoor([r2, r3]);
     this.exit = r3;
 
+    const r4 = this.addRoom(this.seed.x - 1, this.seed.y);
+    const d3 = this.addDoor([r1, r4]);
+
     const {width, height} = this.squish();
 
     this.classifyRooms();
@@ -101,6 +104,7 @@ class MazeKeyGen {
       children: new Set(),
       keysInRoom: [],
       template: 'F1',
+      distance: roomId === 0 ? 0 : null, // Distance from room[0] / spawn
       doors: {
         n: null,
         e: null,
@@ -215,6 +219,7 @@ class MazeKeyGen {
     }
 
     room1.children.add(room2);
+    room2.distance = room1.distance + 1;
 
     this.doors.push({
       id: doorId,
