@@ -15,7 +15,7 @@ class MazeKeyGen {
     this.keys = [];
 
     // Room IDs
-    this.entrance = null;
+    this.entrance = 0;
     this.exit = null;
 
     this.seed = {
@@ -37,13 +37,12 @@ class MazeKeyGen {
     this.reset();
 
     const r1 = this.addRoom(this.seed.x, this.seed.y);
-    this.entrance = r1;
     const r2 = this.addRoom(this.seed.x, this.seed.y - 1);
     const d1 = this.addDoor([r1, r2]);
     const l1 = this.lock(d1, r1);
     const r3 = this.addRoom(this.seed.x + 1, this.seed.y - 1);
     const d2 = this.addDoor([r2, r3]);
-    this.exit = r3;
+    this.setExit(r3);
 
     const r4 = this.addRoom(this.seed.x - 1, this.seed.y);
     const d3 = this.addDoor([r1, r4]);
@@ -105,6 +104,8 @@ class MazeKeyGen {
       keysInRoom: [],
       template: 'F1',
       distance: roomId === 0 ? 0 : null, // Distance from room[0] / spawn
+      exit: false,
+      entrance: roomId === 0,
       doors: {
         n: null,
         e: null,
@@ -225,6 +226,7 @@ class MazeKeyGen {
       id: doorId,
       key: null,
       orientation,
+      exit: false,
       rooms
     });
 
@@ -258,6 +260,23 @@ class MazeKeyGen {
     location.keysInRoom.push(keyId);
 
     return keyId;
+  }
+
+  setExit(roomId) {
+    const room = this.rooms[roomId];
+
+    if (!room) {
+      throw new Error(`invalid room id ${roomId}`);
+    }
+
+    room.exit = true;
+
+    if (room.doors.n) this.doors[room.doors.n].exit = true;
+    if (room.doors.e) this.doors[room.doors.e].exit = true;
+    if (room.doors.s) this.doors[room.doors.s].exit = true;
+    if (room.doors.w) this.doors[room.doors.w].exit = true;
+
+    this.exit = roomId;
   }
 }
 
