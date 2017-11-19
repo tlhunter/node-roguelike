@@ -1,5 +1,5 @@
-const MAX_X = 21;
-const MAX_Y = 21;
+const MAX_X = 201;
+const MAX_Y = 201;
 
 class MazeKeyGen {
   constructor({rooms, keys}) {
@@ -43,17 +43,11 @@ class MazeKeyGen {
     const l1 = this.lock(d1, r1);
     const r3 = this.addRoom(this.seed.x + 1, this.seed.y - 1);
     const d2 = this.addDoor([r2, r3]);
+    this.exit = r3;
 
-    const width = this.bounds.e - this.bounds.w + 1;
-    const height = this.bounds.s - this.bounds.n + 1;
+    const {width, height} = this.squish();
 
-    const xShift = this.bounds.w;
-    const yShift = this.bounds.n;
-
-    for (const room of this.rooms) {
-      room.x -= xShift;
-      room.y -= yShift;
-    }
+    this.classifyRooms();
 
     return {
       size: {
@@ -65,9 +59,34 @@ class MazeKeyGen {
         exit: this.exit
       },
       rooms: this.rooms,
+      //rooms: this.rooms.map(r => {
+        //// Children is an internal concept
+        //delete r.children;
+        //return r;
+      //}),
       doors: this.doors,
       keys: this.keys
     };
+  }
+
+  /**
+   * Shrink the boundaries of the map
+   * Set a new X/Y for every room
+   * @return smallest {width,height} required to fit map
+   */
+  squish() {
+    const width = this.bounds.e - this.bounds.w + 1;
+    const height = this.bounds.s - this.bounds.n + 1;
+
+    const xShift = this.bounds.w;
+    const yShift = this.bounds.n;
+
+    for (const room of this.rooms) {
+      room.x -= xShift;
+      room.y -= yShift;
+    }
+
+    return {width, height};
   }
 
   addRoom(x, y) {
@@ -75,18 +94,22 @@ class MazeKeyGen {
 
     this.stretch(x, y);
 
-    this.rooms.push({
+    const room = {
       id: roomId,
       x,
       y,
+      children: new Set(),
       keysInRoom: [],
+      template: 'F1',
       doors: {
         n: null,
         e: null,
         s: null,
         w: null
       }
-    });
+    };
+
+    this.rooms.push(room);
 
     return roomId;
   }
@@ -103,6 +126,56 @@ class MazeKeyGen {
     }
     if (x < this.bounds.w) {
       this.bounds.w = x;
+    }
+  }
+
+  classifyRooms() {
+    for (const room of this.rooms) {
+      let doors = 0;
+      if (room.doors.n !== null) doors++;
+      if (room.doors.e !== null) doors++;
+      if (room.doors.s !== null) doors++;
+      if (room.doors.w !== null) doors++;
+
+      if (doors === 1) { // D (Dead End)
+        if (room.doors.n !== null) {
+          room.template = 'D1';
+        } else if (room.doors.e !== null) {
+          room.template = 'D2';
+        } else if (room.doors.s !== null) {
+          room.template = 'D3';
+        } else if (room.doors.w !== null) {
+          room.template = 'D4';
+        }
+      } else if (doors === 2) { // B (Bend) or C (Corridoor)
+        if (room.doors.n !== null && room.doors.s !== null) {
+          room.template = 'C1';
+        } else if (room.doors.e !== null && room.doors.w !== null) {
+          room.template = 'C2';
+        } else if (room.doors.n !== null && room.doors.e !== null) {
+          room.template = 'B1';
+        } else if (room.doors.e !== null && room.doors.s !== null) {
+          room.template = 'B2';
+        } else if (room.doors.s !== null && room.doors.w !== null) {
+          room.template = 'B3';
+        } else if (room.doors.w !== null && room.doors.n !== null) {
+          room.template = 'B4';
+        }
+      } else if (doors === 3) { // E
+        if (room.doors.s === null) {
+          room.template = 'E1';
+        } else if (room.doors.w === null) {
+          room.template = 'E2';
+        } else if (room.doors.n === null) {
+          room.template = 'E3';
+        } else if (room.doors.e === null) {
+          room.template = 'E4';
+        }
+      } else if (doors === 4) { // A (All)
+        room.template = 'A1';
+      } else { // F (Fucked)
+        room.template = 'F1';
+      }
     }
   }
 
@@ -140,6 +213,8 @@ class MazeKeyGen {
     } else {
       throw new Error('Rooms must be adjacent');
     }
+
+    room1.children.add(room2);
 
     this.doors.push({
       id: doorId,
