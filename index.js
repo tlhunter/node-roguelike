@@ -96,6 +96,8 @@ class MazeKeyGen {
 
     const {width, height} = this.squish();
 
+    const grid = this.generateGrid(width, height);
+
     const deadends = this.classifyRooms();
 
     return {
@@ -109,6 +111,7 @@ class MazeKeyGen {
         deadends
       },
       rooms: this.rooms,
+      grid,
       //rooms: this.rooms.map(r => {
         //// Children is an internal concept
         //delete r.children;
@@ -348,6 +351,35 @@ class MazeKeyGen {
     location.keysInRoom.push(keyId);
 
     return keyId;
+  }
+
+  /**
+   * Generates a 2D array of Room IDs
+   * Makes it easier for games to visualize the map
+   */
+  generateGrid(width, height) {
+    const grid = [];
+
+    for (let y = 0; y < height; y++) {
+      const row = [];
+      for (let x = 0; x < width; x++) {
+        row.push(null);
+      }
+      grid.push(row);
+    }
+
+    const self = this;
+    function addRoomToGrid(roomId) {
+      const room = self.rooms[roomId];
+      grid[room.y][room.x] = room.id;
+      for (let child of room.children) {
+        addRoomToGrid(child.id);
+      }
+    }
+
+    addRoomToGrid(0);
+
+    return grid;
   }
 
   setExit(roomId) {
