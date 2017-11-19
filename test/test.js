@@ -1,6 +1,6 @@
 const MazeKeyGen = require('../index.js');
 
-const level = new MazeKeyGen({rooms: 5, keys: 2});
+const level = new MazeKeyGen({rooms: 100, keys: 5});
 
 const result = level.generate();
 

@@ -1,5 +1,6 @@
 const MAX_X = 201;
 const MAX_Y = 201;
+const DIR = ['n', 'e', 's', 'w'];
 
 class MazeKeyGen {
   constructor({rooms, keys}) {
@@ -31,21 +32,67 @@ class MazeKeyGen {
       s: this.seed.y,
       w: this.seed.x
     };
+
+    // Keeps track of the room which is the furthest in any direction
+    // Rooms are tracked based on their coordinate tangential to that direction
+    // This lets us add rooms without iteratively 'sliding' them in from the outside
+    this.furthest = {
+      n: new Map(), // X => roomId
+      e: new Map(), // Y => roomId
+      s: new Map(), // X => roomId
+      w: new Map()  // Y => roomId
+    };
   }
 
   generate() {
     this.reset();
 
-    const r1 = this.addRoom(this.seed.x, this.seed.y);
-    const r2 = this.addRoom(this.seed.x, this.seed.y - 1);
-    const d1 = this.addDoor([r1, r2]);
-    const l1 = this.lock(d1, r1);
-    const r3 = this.addRoom(this.seed.x + 1, this.seed.y - 1);
-    const d2 = this.addDoor([r2, r3]);
-    this.setExit(r3);
+    const root = this.addRoom(this.seed.x, this.seed.y);
+    console.log('furthest obj after adding root', this.furthest);
 
-    const r4 = this.addRoom(this.seed.x - 1, this.seed.y);
-    const d3 = this.addDoor([r1, r4]);
+    for (let i = 0; i < this.maxRooms; i++) {
+      let dir = DIR[Math.floor(Math.random() * DIR.length)]; // Which direction are we adding a room from
+
+      let x, y, parentRoom;
+
+      console.log('DIRECTION', dir, 'BOUNDS', this.bounds);
+      if (dir === 'n') { // Sliding southward from north
+        x = Math.floor(Math.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
+        console.log('X', x);
+        const parentRoomId = this.furthest.n.get(x);
+        parentRoom = this.rooms[parentRoomId];
+        y = parentRoom.y - 1;
+        console.log('Y', y);
+      } else if (dir === 'e') { // Sliding westward from east
+        y = Math.floor(Math.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
+        console.log('Y', y);
+        const parentRoomId = this.furthest.e.get(y);
+        parentRoom = this.rooms[parentRoomId];
+        x = parentRoom.x + 1;
+        console.log('X', x);
+      } else if (dir === 's') { // Sliding northward from south
+        x = Math.floor(Math.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
+        console.log('X', x);
+        const parentRoomId = this.furthest.s.get(x);
+        parentRoom = this.rooms[parentRoomId];
+        y = parentRoom.y + 1;
+        console.log('Y', y);
+      } else if (dir === 'w') { // Sliding eastward from west
+        y = Math.floor(Math.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
+        console.log('Y', y);
+        const parentRoomId = this.furthest.w.get(y);
+        parentRoom = this.rooms[parentRoomId];
+        x = parentRoom.x - 1;
+        console.log('X', x);
+      }
+
+      const newRoomId = this.addRoom(x, y);
+      console.log('new room', newRoomId);
+      const d = this.addDoor(parentRoom.id, newRoomId);
+    }
+
+    //this.setExit(longestRoom);
+
 
     const {width, height} = this.squish();
 
@@ -93,9 +140,18 @@ class MazeKeyGen {
   }
 
   addRoom(x, y) {
+    for (let room of this.rooms) { // TODO: DON'T COMMIT
+      if (room.x === x && room.y === y) {
+        console.error('furthest', this.furthest);
+        console.error('new x, y', x, y);
+        console.error(room);
+        throw new Error("ROOM COLLISION!");
+      }
+    }
     const roomId = this.rooms.length;
 
     this.stretch(x, y);
+    this.further(x, y, roomId);
 
     const room = {
       id: roomId,
@@ -118,6 +174,28 @@ class MazeKeyGen {
     this.rooms.push(room);
 
     return roomId;
+  }
+
+  further(x, y, roomId) {
+    const mostNorth = this.furthest.n.get(x);
+    if (typeof mostNorth === 'undefined' || this.rooms[mostNorth].y > y) {
+      this.furthest.n.set(x, roomId);
+    }
+
+    const mostEast = this.furthest.e.get(y);
+    if (typeof mostEast === 'undefined' || this.rooms[mostEast].x < x) {
+      this.furthest.e.set(y, roomId);
+    }
+
+    const mostSouth = this.furthest.s.get(x);
+    if (typeof mostSouth === 'undefined' || this.rooms[mostSouth].y < y) {
+      this.furthest.s.set(x, roomId);
+    }
+
+    const mostWest = this.furthest.w.get(y);
+    if (typeof mostWest === 'undefined' || this.rooms[mostWest].x > x) {
+      this.furthest.w.set(y, roomId);
+    }
   }
 
   stretch(x, y) {
@@ -195,45 +273,49 @@ class MazeKeyGen {
    *
    * @return doorId
    */
-  addDoor(rooms) {
+  addDoor(parentRoomId, childRoomId) {
+    const parentRoom = this.rooms[parentRoomId];
+    const childRoom = this.rooms[childRoomId];
     const doorId = this.doors.length;
-    const room1 = this.rooms[rooms[0]];
-    const room2 = this.rooms[rooms[1]];
     let orientation = null;
 
-    if (room1.x === room2.x && room1.y === room2.y - 1) {
+    console.log('addDoor', parentRoomId, childRoomId);
+    console.log('parent', parentRoom.x, parentRoom.y);
+    console.log('child', childRoom.x, childRoom.y);
+
+    if (parentRoom.x === childRoom.x && parentRoom.y === childRoom.y - 1) {
       // R1 north of R2
       orientation = 'v';
-      room1.doors.s = doorId;
-      room2.doors.n = doorId;
-    } else if (room1.x === room2.x + 1 && room1.y === room2.y) {
+      parentRoom.doors.s = doorId;
+      childRoom.doors.n = doorId;
+    } else if (parentRoom.x === childRoom.x + 1 && parentRoom.y === childRoom.y) {
       // R1 east of R2
       orientation = 'h';
-      room1.doors.w = doorId;
-      room2.doors.e = doorId;
-    } else if (room1.x === room2.x && room1.y === room2.y + 1) {
+      parentRoom.doors.w = doorId;
+      childRoom.doors.e = doorId;
+    } else if (parentRoom.x === childRoom.x && parentRoom.y === childRoom.y + 1) {
       // R1 south of R2
       orientation = 'v';
-      room1.doors.n = doorId;
-      room2.doors.s = doorId;
-    } else if (room1.x === room2.x - 1 && room1.y === room2.y) {
+      parentRoom.doors.n = doorId;
+      childRoom.doors.s = doorId;
+    } else if (parentRoom.x === childRoom.x - 1 && parentRoom.y === childRoom.y) {
       // R1 west of R2
       orientation = 'h';
-      room1.doors.e = doorId;
-      room2.doors.w = doorId;
+      parentRoom.doors.e = doorId;
+      childRoom.doors.w = doorId;
     } else {
       throw new Error('Rooms must be adjacent');
     }
 
-    room1.children.add(room2);
-    room2.distance = room1.distance + 1;
+    parentRoom.children.add(childRoom);
+    childRoom.distance = parentRoom.distance + 1;
 
     this.doors.push({
       id: doorId,
       key: null,
       orientation,
       exit: false,
-      rooms
+      rooms: [parentRoom, childRoom]
     });
 
     return doorId;
