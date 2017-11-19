@@ -49,7 +49,7 @@ class MazeKeyGen {
 
     const {width, height} = this.squish();
 
-    this.classifyRooms();
+    const deadends = this.classifyRooms();
 
     return {
       size: {
@@ -58,7 +58,8 @@ class MazeKeyGen {
       },
       terminals: {
         entrance: this.entrance,
-        exit: this.exit
+        exit: this.exit,
+        deadends
       },
       rooms: this.rooms,
       //rooms: this.rooms.map(r => {
@@ -135,6 +136,8 @@ class MazeKeyGen {
   }
 
   classifyRooms() {
+    const deadends = [];
+
     for (const room of this.rooms) {
       let doors = 0;
       if (room.doors.n !== null) doors++;
@@ -143,6 +146,7 @@ class MazeKeyGen {
       if (room.doors.w !== null) doors++;
 
       if (doors === 1) { // D (Dead End)
+        deadends.push(room.id);
         if (room.doors.n !== null) {
           room.template = 'D1';
         } else if (room.doors.e !== null) {
@@ -182,6 +186,8 @@ class MazeKeyGen {
         room.template = 'F1';
       }
     }
+
+    return deadends;
   }
 
   /**
