@@ -12,8 +12,11 @@ const KEY_COLORS = {
   5: 'cyan'
 };
 
+const ROOMS = Number(process.argv[2]) || 100;
+const KEYS = Number(process.argv[3]) || 6;
+
 const start = Date.now();
-const level = new MazeKeyGen({rooms: 100, keys: 6});
+const level = new MazeKeyGen({rooms: ROOMS, keys: KEYS});
 const result = level.generate();
 const time = Date.now() - start;
 
