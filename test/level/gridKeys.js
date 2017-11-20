@@ -1,5 +1,7 @@
+#!/usr/bin/env node
+
 const colors = require('colors/safe');
-const MazeKeyGen = require('../index.js');
+const MazeKeyGen = require('../../level/gridKeys');
 
 const NULL_KEY = 'white';
 const ENTER_EXIT = 'inverse';
