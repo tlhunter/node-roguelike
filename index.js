@@ -112,15 +112,16 @@ class MazeKeyGen {
         exit: this.exit,
         deadends: this.deadends
       },
-      rooms: this.rooms,
-      grid,
-      //rooms: this.rooms.map(r => {
-        //// Children is an internal concept
-        //delete r.children;
-        //return r;
-      //}),
-      doors: this.doors,
-      keys: this.keys
+      rooms: this.rooms.map(r => {
+        delete r.children;
+        return r;
+      }),
+      doors: this.doors.map(d => {
+        d.rooms = d.rooms.map(r => r.id);
+        return d;
+      }),
+      keys: this.keys,
+      grid
     };
   }
 

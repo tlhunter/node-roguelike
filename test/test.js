@@ -20,9 +20,6 @@ const level = new MazeKeyGen({rooms: ROOMS, keys: KEYS});
 const result = level.generate();
 const time = Date.now() - start;
 
-//console.log(JSON.stringify(result.grid, null, 2));
-//console.log(level.roomsByDistance, level.maxDistance);
-
 const grid = result.grid;
 
 for (let y = 0; y < result.size.height; y++) {

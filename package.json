@@ -1,7 +1,7 @@
 {
   "name": "maze-key-gen",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Generates dungeon-style levels",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -9,8 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Thomas Hunter II <me@thomashunter.name>",
+  "license": "BSD",
   "devDependencies": {
     "colors": "^1.1.2"
   }
