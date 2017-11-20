@@ -1,6 +1,6 @@
 # Roguelike Level Generators
 
-![Screenshot of Multiple Level Generators](screenshots/banner.png)
+![Screenshot of Multiple Level Generators](https://raw.githubusercontent.com/tlhunter/node-roguelike/master/screenshots/banner.png)
 
 This repository contains multiple 2D "dungeon" level generator algorithms.
 Depending on the genre of game you're building, one algorithm will be better than another.
@@ -219,7 +219,7 @@ If specified, this level generator will lock doors and place keys throughout the
 
 ### Example Generated Level
 
-![Grid with Keys and Locks Level Generator Screenshot](screenshots/level/gridKeys/screenshot.png)
+![Grid with Keys and Locks Level Generator Screenshot](https://raw.githubusercontent.com/tlhunter/node-roguelike/master/screenshots/level/gridKeys/screenshot.png)
 
 In this diagram, numbers are rooms, with room 000 being the entrance and room 006 the exit.
 If a room is colored than the room contains a key.
@@ -242,7 +242,7 @@ This is a convenience for figuring out which prefabricated room designs you woul
 This diagram explains the design of each room.
 In theory you can simply design one level for each letter and then rotate them for each number.
 
-![Room Type Descriptions](screenshots/level/gridKeys/room-types.png)
+![Room Type Descriptions](https://raw.githubusercontent.com/tlhunter/node-roguelike/master/screenshots/level/gridKeys/room-types.png)
 
 ### Example Output
 
