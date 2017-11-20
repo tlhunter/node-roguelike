@@ -13,5 +13,13 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "colors": "^1.1.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tlhunter/node-roguelike.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tlhunter/node-roguelike/issues"
+  },
+  "homepage": "https://github.com/tlhunter/node-roguelike#readme"
 }
