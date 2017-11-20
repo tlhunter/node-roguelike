@@ -1,12 +1,15 @@
 # Roguelike Level Generators
 
-This repository contains multiple 2D "dungeon" level generators.
+![Screenshot of Multiple Level Generators](screenshots/banner.png)
+
+This repository contains multiple 2D "dungeon" level generator algorithms.
+Depending on the genre of game you're building, one algorithm will be better than another.
 
 ```sh
 npm install roguelike
 ```
 
-Here's a list of the supported level generators:
+##### Table of Contents
 
 * [Classic Roguelike Level Generator](#level-roguelike)
 * [Grid with Keys and Locks Level Generator](#level-gridKeys)
