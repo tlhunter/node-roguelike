@@ -174,7 +174,7 @@ The `world` attribute is entirely optional for you to use. All the data within i
     [10, 10]
     // ... Truncated List of Walls ...
   ],
-  "world": [
+  "world": [ // [Y][X] array
     [ 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0 ],
     [ 0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0 ],
     [ 0, 0, 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 ],
@@ -262,7 +262,7 @@ In theory you can simply design one level for each letter and then rotate them f
     "exit": 8
   },
 
-  // Here is a 2D grid of the map, stored as Y[X]. Numbers represent Room IDs
+  // Here is a 2D grid of the map, stored as [Y][X]. Numbers represent Room IDs
   "grid": [
     [ 7, 0, 2 ],
     [ 6, 1, null ],
@@ -529,7 +529,7 @@ console.log(result);
 ### Example Output
 
 The resulting object contains three properties.
-The first property is `map` and contains a grid of all zones in the map and is formatted `[X][Y]`.
+The first property is `map` and contains a grid of all zones in the map and is formatted `[Y][X]`.
 The next property is `exits` and gives us the coordinate of all four map exits.
 The last property is `rooms`, an array of rooms and the zones contained in each room.
 

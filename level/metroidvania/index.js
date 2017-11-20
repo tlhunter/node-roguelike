@@ -81,7 +81,7 @@ module.exports = (config = {}) => {
         if (!cursor) {
           return null;
         }
-        const zone = map[cursor.x][cursor.y];
+        const zone = map[cursor.y][cursor.x];
 
         zones_in_this_room.push({
           x: cursor.x,
@@ -128,34 +128,34 @@ module.exports = (config = {}) => {
           // Don't attempt to build random doors on extremes. Could be more specific though, doesn't always need to be avoided.
           continue;
         }
-        const this_zone = map[coords.x][coords.y];
+        const this_zone = map[coords.y][coords.x];
         const this_room_id = this_zone.room;
 
         let comparedZone = null;
 
         // South
-        comparedZone = map[coords.x][coords.y+1];
+        comparedZone = map[coords.y+1][coords.x];
         if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x, y: coords.y+1});
           new_door_count++;
         }
 
         // North
-        comparedZone = map[coords.x][coords.y-1];
+        comparedZone = map[coords.y-1][coords.x];
         if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x, y: coords.y-1});
           new_door_count++;
         }
 
         // West
-        comparedZone = map[coords.x-1][coords.y];
+        comparedZone = map[coords.y][coords.x-1];
         if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x-1, y: coords.y});
           new_door_count++;
         }
 
         // East
-        comparedZone = map[coords.x+1][coords.y];
+        comparedZone = map[coords.y][coords.x+1];
         if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x+1, y: coords.y});
           new_door_count++;
@@ -171,8 +171,8 @@ module.exports = (config = {}) => {
     // Build our exits
     let dir = null;
     for (const dir of DIRECTIONS) {
-      map[exits[dir].x][exits[dir].y].edges[dir] = EXIT;
-      map[exits[dir].x][exits[dir].y].exit = true;
+      map[exits[dir].y][exits[dir].x].edges[dir] = EXIT;
+      map[exits[dir].y][exits[dir].x].exit = true;
     }
 
     return {
@@ -226,7 +226,7 @@ module.exports = (config = {}) => {
         return null;
       }
 
-      if (!map[newCursor.x][newCursor.y].open) {
+      if (!map[newCursor.y][newCursor.x].open) {
         return newCursor;
       }
     }
@@ -239,41 +239,41 @@ module.exports = (config = {}) => {
   // sure we're not looking outside the bounds of our array (<0 | >MAX).
   // Also, don't want to blow away doors...
   function buildWallsForZone(map, loc) {
-    const room = map[loc.x][loc.y].room;
+    const room = map[loc.y][loc.x].room;
 
     // NORTH
-    if (map[loc.x][loc.y].edges.n != DOOR) {
-      if (loc.y === 0 || !map[loc.x][loc.y-1].open || map[loc.x][loc.y-1].room != room) {
-        map[loc.x][loc.y].edges.n = WALL;
+    if (map[loc.y][loc.x].edges.n != DOOR) {
+      if (loc.y === 0 || !map[loc.y-1][loc.x].open || map[loc.y-1][loc.x].room != room) {
+        map[loc.y][loc.x].edges.n = WALL;
       } else {
-        map[loc.x][loc.y].edges.n = OPEN;
+        map[loc.y][loc.x].edges.n = OPEN;
       }
     }
 
     // EAST
-    if (map[loc.x][loc.y].edges.e != DOOR) {
-      if (loc.x >= MAP_WIDTH-1 || !map[loc.x+1][loc.y].open || map[loc.x+1][loc.y].room != room) {
-        map[loc.x][loc.y].edges.e = WALL;
+    if (map[loc.y][loc.x].edges.e != DOOR) {
+      if (loc.x >= MAP_WIDTH-1 || !map[loc.y][loc.x+1].open || map[loc.y][loc.x+1].room != room) {
+        map[loc.y][loc.x].edges.e = WALL;
       } else {
-        map[loc.x][loc.y].edges.e = OPEN;
+        map[loc.y][loc.x].edges.e = OPEN;
       }
     }
 
     // SOUTH
-    if (map[loc.x][loc.y].edges.s != DOOR) {
-      if (loc.y >= MAP_HEIGHT-1 || !map[loc.x][loc.y+1].open || map[loc.x][loc.y+1].room != room) {
-        map[loc.x][loc.y].edges.s = WALL;
+    if (map[loc.y][loc.x].edges.s != DOOR) {
+      if (loc.y >= MAP_HEIGHT-1 || !map[loc.y+1][loc.x].open || map[loc.y+1][loc.x].room != room) {
+        map[loc.y][loc.x].edges.s = WALL;
       } else {
-        map[loc.x][loc.y].edges.s = OPEN;
+        map[loc.y][loc.x].edges.s = OPEN;
       }
     }
 
     // WEST
-    if (map[loc.x][loc.y].edges.w != DOOR) {
-      if (loc.x === 0 || !map[loc.x-1][loc.y].open || map[loc.x-1][loc.y].room != room) {
-        map[loc.x][loc.y].edges.w = WALL;
+    if (map[loc.y][loc.x].edges.w != DOOR) {
+      if (loc.x === 0 || !map[loc.y][loc.x-1].open || map[loc.y][loc.x-1].room != room) {
+        map[loc.y][loc.x].edges.w = WALL;
       } else {
-        map[loc.x][loc.y].edges.w = OPEN;
+        map[loc.y][loc.x].edges.w = OPEN;
       }
     }
   }
@@ -286,8 +286,8 @@ function rangedRandom(min, max) {
 
 // Builds a door between these two (hopefully) adjacent zones
 function buildDoorBetweenZones(map, zonePos1, zonePos2) {
-  const zone1 = map[zonePos1.x][zonePos1.y];
-  const zone2 = map[zonePos2.x][zonePos2.y];
+  const zone1 = map[zonePos1.y][zonePos1.x];
+  const zone2 = map[zonePos2.y][zonePos2.x];
 
   if (zonePos1.x == zonePos2.x && zonePos1.y > zonePos2.y) {
     // ZONE1 SOUTH OF ZONE2
@@ -329,11 +329,11 @@ function shuffle(array) {
 function initialize(width, height) {
   const map = [];
 
-  for (let x = 0; x < width; x++) {
-    map[x] = [];
+  for (let y = 0; y < height; y++) {
+    map[y] = [];
 
-    for (let y = 0; y < height; y++) {
-      map[x][y] = {
+    for (let x = 0; x < width; x++) {
+      map[y][x] = {
         open: false,
         room: null,
         exit: null,
