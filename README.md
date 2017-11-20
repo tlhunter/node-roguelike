@@ -13,6 +13,7 @@ npm install roguelike
 
 * [Classic Roguelike Level Generator](#level-roguelike)
 * [Grid with Keys and Locks Level Generator](#level-gridKeys)
+* [Metroidvania with Odd Room Shapes](#level-metroidvania)
 
 <a name="level-roguelike"></a>
 ## `roguelike/level/roguelike`: Classic Roguelike Level Generator
@@ -486,6 +487,285 @@ In theory you can simply design one level for each letter and then rotate them f
       "x": 0,
       "y": 3
     }
+  ]
+}
+```
+
+
+<a name="level-metroidvania"></a>
+## `roguelike/level/metroidvania`: Metroidvania with Odd Room Shapes
+
+This level generator is useful for creating Metroidvania style dungeons.
+Each individual unit in the grid is referred to as a zone.
+Rooms are made up of one or more zones and can be of arbitrary shapes.
+Levels will contain one exit in each of the cardinal directions.
+There is also an online [Level Generator](https://thomashunter.name/games/roguelike-generator/) to give a better feel of level generation.
+
+
+### Example Generated Level
+
+![Metroidvania Screenshot](https://raw.githubusercontent.com/tlhunter/node-roguelike/master/screenshots/level/metroidvania/screenshot.png)
+
+### Usage
+
+```javascript
+const LevelMetroidvania = require('roguelike/level/metroidvania');
+
+const result = LevelMetroidvania({
+  width: 5,             // Max number of zones wide
+  height: 5,            // Max number of zones tall
+  minZonesPerRoom: 1,   // Minimum number of zones per room
+  maxZonesPerRoom: 3,   // Maximum number of zones per room
+  minRoomsPerMap: 1,    // Minimum number of rooms per map
+  maxRoomsPerMap: 9,    // Maximum number of rooms per map
+  newDoors: 2,          // How many additional doors to add to prevent tedious linear mazes
+  roomDiff: 2,          // When adding a new door, at least how far should their room ID's be
+  roomDiffOdds: 1/2     // Odds of inserting a new door when an opportunity happens
+});
+
+console.log(result);
+```
+
+### Example Output
+
+The resulting object contains three properties.
+The first property is `map` and contains a grid of all zones in the map and is formatted `[X][Y]`.
+The next property is `exits` and gives us the coordinate of all four map exits.
+The last property is `rooms`, an array of rooms and the zones contained in each room.
+
+Each zone element in the map contains a few properties.
+The `open` field is whether the zone is an open/passable/traversable area (if false, it's just void).
+The `room` field gives us the ID of the room this zone is a part of.
+The `exit` field tells us of the room contains a level exit.
+The `zone` field gives us the ID of the Zone (not very useful).
+The `edges` field describes the four edges of the zone.
+
+An edge can be `open` if it connects to another Zone in the same room.
+It can be `wall` if the edge should contain a wall.
+It can be `door` if the edge shuld connect one room to another.
+It can be `exit` if this edge is a connection to another map.
+
+```javascript
+{
+  "map": [
+    [
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": true,
+        "room": 1,
+        "exit": true,
+        "zone": 3,
+        "edges": { "n": "wall", "e": "open", "s": "wall", "w": "exit" }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      }
+    ],
+    [
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": true,
+        "room": 2,
+        "exit": null,
+        "zone": 4,
+        "edges": { "n": "wall", "e": "door", "s": "door", "w": "wall" }
+      },
+      {
+        "open": true,
+        "room": 1,
+        "exit": null,
+        "zone": 1,
+        "edges": { "n": "door", "e": "door", "s": "open", "w": "wall" }
+      },
+      {
+        "open": true,
+        "room": 1,
+        "exit": null,
+        "zone": 2,
+        "edges": { "n": "open", "e": "door", "s": "wall", "w": "open" }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      }
+    ],
+    [
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": true,
+        "room": 3,
+        "exit": null,
+        "zone": 5,
+        "edges": { "n": "wall", "e": "door", "s": "wall", "w": "door" }
+      },
+      {
+        "open": true,
+        "room": 0,
+        "exit": null,
+        "zone": 0,
+        "edges": { "n": "wall", "e": "wall", "s": "door", "w": "door" }
+      },
+      {
+        "open": true,
+        "room": 5,
+        "exit": null,
+        "zone": 9,
+        "edges": { "n": "door", "e": "door", "s": "door", "w": "door" }
+      },
+      {
+        "open": true,
+        "room": 6,
+        "exit": true,
+        "zone": 10,
+        "edges": { "n": "door", "e": "wall", "s": "exit", "w": "wall" }
+      }
+    ],
+    [
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": true,
+        "room": 4,
+        "exit": true,
+        "zone": 6,
+        "edges": { "n": "exit", "e": "wall", "s": "open", "w": "door" }
+      },
+      {
+        "open": true,
+        "room": 4,
+        "exit": null,
+        "zone": 7,
+        "edges": { "n": "open", "e": "wall", "s": "open", "w": "wall" }
+      },
+      {
+        "open": true,
+        "room": 4,
+        "exit": true,
+        "zone": 8,
+        "edges": { "n": "open", "e": "exit", "s": "wall", "w": "door" }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      }
+    ],
+    [
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      },
+      {
+        "open": false,
+        "room": null,
+        "exit": null,
+        "zone": null,
+        "edges": { "n": null, "e": null, "s": null, "w": null }
+      }
+    ]
+  ],
+  "exits": {
+    "n": { "x": 3, "y": 1 },
+    "s": { "x": 2, "y": 4 },
+    "e": { "x": 3, "y": 3 },
+    "w": { "x": 0, "y": 3 }
+  },
+  "rooms": [
+    [
+      { "x": 2, "y": 2 }
+    ],
+    [
+      { "x": 1, "y": 2 },
+      { "x": 1, "y": 3 },
+      { "x": 0, "y": 3 }
+    ],
+    [
+      { "x": 1, "y": 1 }
+    ],
+    [
+      { "x": 2, "y": 1 }
+    ],
+    [
+      { "x": 3, "y": 1 },
+      { "x": 3, "y": 2 },
+      { "x": 3, "y": 3 }
+    ],
+    [
+      { "x": 2, "y": 3 }
+    ],
+    [
+      { "x": 2, "y": 4 }
+    ]
   ]
 }
 ```
