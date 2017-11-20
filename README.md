@@ -210,6 +210,11 @@ If specified, this level generator will lock doors and place keys throughout the
 
 ![Grid with Keys and Locks Level Generator Screenshot](screenshots/level/gridKeys/screenshot.png)
 
+In this diagram, numbers are rooms, with room 000 being the entrance and room 006 the exit.
+If a room is colored than the room contains a key.
+A `-` hyphen or `|` pipe represents a door between two rooms.
+If the door is colored it means that door is locked.
+
 ### Usage
 
 ```javascript
