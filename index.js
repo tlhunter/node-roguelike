@@ -155,7 +155,7 @@ class MazeKeyGen {
       x,
       y,
       children: new Set(),
-      keysInRoom: [],
+      keyInRoom: null,
       template: 'F1',
       distance: roomId === 0 ? 0 : null, // Distance from room[0] / spawn
       exit: false,
@@ -371,7 +371,7 @@ class MazeKeyGen {
     });
 
     this.doors[doorId].key = keyId;
-    location.keysInRoom.push(keyId);
+    location.keyInRoom = keyId;
 
     return keyId;
   }

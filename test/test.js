@@ -32,18 +32,18 @@ for (let y = 0; y < result.size.height; y++) {
     let roomId = grid[y][x];
     let room = result.rooms[roomId];
     if (!room) {
-      row1 += '   ';
-      row2 += '   ';
+      row1 += '    ';
+      row2 += '    ';
       continue;
     }
 
-    let color = KEY_COLORS[room.keysInRoom[0]] || NULL_KEY;
+    let color = KEY_COLORS[room.keyInRoom] || NULL_KEY;
 
     if (room.entrance || room.exit) {
       color = ENTER_EXIT;
     }
 
-    row1 += colors[color](String(roomId).padStart(2, '0'));
+    row1 += colors[color](String(roomId).padStart(3, '0'));
 
     if (room.doors.e !== null) {
       let door = result.doors[room.doors.e];
@@ -56,9 +56,9 @@ for (let y = 0; y < result.size.height; y++) {
     if (room.doors.s !== null) {
       let door = result.doors[room.doors.s];
       let color = KEY_COLORS[door.key] || NULL_KEY;
-      row2 += colors[color](' | ');
+      row2 += colors[color]('  | ');
     } else {
-      row2 += '   ';
+      row2 += '    ';
     }
   }
 
@@ -72,3 +72,5 @@ console.log(`Rooms: ${result.rooms.length}`);
 console.log(`Entrance: ${result.terminals.entrance}, Exit: ${result.terminals.exit}`);
 console.log(`Keys/Locks: ${result.keys.length}`);
 console.log(`Time to Generate: ${time}ms`);
+
+console.log(JSON.stringify(result));
