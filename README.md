@@ -6,6 +6,12 @@ This repository contains multiple 2D "dungeon" level generators.
 npm install roguelike
 ```
 
+Here's a list of the supported level generators:
+
+* [Classic Roguelike Level Generator](#level-roguelike)
+* [Grid with Keys and Locks Level Generator](#level-gridKeys)
+
+<a name="level-roguelike"></a>
 ## `roguelike/level/roguelike`: Classic Roguelike Level Generator
 
 The concept is simple, inspired by sliding system used by [Brogue](https://www.rockpapershotgun.com/2015/07/28/how-do-roguelikes-generate-levels/).
@@ -200,6 +206,8 @@ The `world` attribute is entirely optional for you to use. All the data within i
 * Weird things will happen if you try to generate rooms larger than the world
 
 
+
+<a name="level-gridKeys"></a>
 ## `roguelike/level/gridKeys`: Grid with Keys and Locks Level Generator
 
 Unlike the Roguelike level generator, this level generator doesn'actually care about the content of each "room".
