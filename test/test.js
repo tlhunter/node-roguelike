@@ -1,10 +1,24 @@
+const colors = require('colors/safe');
 const MazeKeyGen = require('../index.js');
 
-const level = new MazeKeyGen({rooms: 99, keys: 5});
+const NULL_KEY = 'white';
+const ENTER_EXIT = 'inverse';
+const KEY_COLORS = {
+  0: 'red',
+  1: 'green',
+  2: 'blue',
+  3: 'yellow',
+  4: 'magenta',
+  5: 'cyan'
+};
 
+const start = Date.now();
+const level = new MazeKeyGen({rooms: 100, keys: 6});
 const result = level.generate();
+const time = Date.now() - start;
 
 //console.log(JSON.stringify(result.grid, null, 2));
+//console.log(level.roomsByDistance, level.maxDistance);
 
 const grid = result.grid;
 
@@ -19,15 +33,27 @@ for (let y = 0; y < result.size.height; y++) {
       row2 += '   ';
       continue;
     }
-    row1 += String(roomId).padStart(2);
+
+    let color = KEY_COLORS[room.keysInRoom[0]] || NULL_KEY;
+
+    if (room.entrance || room.exit) {
+      color = ENTER_EXIT;
+    }
+
+    row1 += colors[color](String(roomId).padStart(2, '0'));
+
     if (room.doors.e !== null) {
-      row1 += '-';
+      let door = result.doors[room.doors.e];
+      let color = KEY_COLORS[door.key] || NULL_KEY;
+      row1 += colors[color]('-');
     } else {
       row1 += ' ';
     }
 
     if (room.doors.s !== null) {
-      row2 += ' | ';
+      let door = result.doors[room.doors.s];
+      let color = KEY_COLORS[door.key] || NULL_KEY;
+      row2 += colors[color](' | ');
     } else {
       row2 += '   ';
     }
@@ -41,5 +67,5 @@ console.log(`Size: ${result.size.width}x${result.size.height}`);
 console.log(`Deadends: ${result.terminals.deadends}`);
 console.log(`Rooms: ${result.rooms.length}`);
 console.log(`Entrance: ${result.terminals.entrance}, Exit: ${result.terminals.exit}`);
-
-//console.log(level);
+console.log(`Keys/Locks: ${result.keys.length}`);
+console.log(`Time to Generate: ${time}ms`);

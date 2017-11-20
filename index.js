@@ -42,63 +42,65 @@ class MazeKeyGen {
       s: new Map(), // X => roomId
       w: new Map()  // Y => roomId
     };
+
+    this.roomsByDistance = new Map();
+    this.maxDistance = 0;
   }
 
   generate() {
     this.reset();
 
     const root = this.addRoom(this.seed.x, this.seed.y);
-    console.log('furthest obj after adding root', this.furthest);
 
-    for (let i = 0; i < this.maxRooms; i++) {
+    for (let i = 0; i < this.maxRooms - 1; i++) {
       let dir = DIR[Math.floor(Math.random() * DIR.length)]; // Which direction are we adding a room from
 
       let x, y, parentRoom;
 
-      console.log('DIRECTION', dir, 'BOUNDS', this.bounds);
       if (dir === 'n') { // Sliding southward from north
         x = Math.floor(Math.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
-        console.log('X', x);
         const parentRoomId = this.furthest.n.get(x);
         parentRoom = this.rooms[parentRoomId];
         y = parentRoom.y - 1;
-        console.log('Y', y);
       } else if (dir === 'e') { // Sliding westward from east
         y = Math.floor(Math.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
-        console.log('Y', y);
         const parentRoomId = this.furthest.e.get(y);
         parentRoom = this.rooms[parentRoomId];
         x = parentRoom.x + 1;
-        console.log('X', x);
       } else if (dir === 's') { // Sliding northward from south
         x = Math.floor(Math.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
-        console.log('X', x);
         const parentRoomId = this.furthest.s.get(x);
         parentRoom = this.rooms[parentRoomId];
         y = parentRoom.y + 1;
-        console.log('Y', y);
       } else if (dir === 'w') { // Sliding eastward from west
         y = Math.floor(Math.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
-        console.log('Y', y);
         const parentRoomId = this.furthest.w.get(y);
         parentRoom = this.rooms[parentRoomId];
         x = parentRoom.x - 1;
-        console.log('X', x);
       }
 
       const newRoomId = this.addRoom(x, y);
-      console.log('new room', newRoomId);
       const d = this.addDoor(parentRoom.id, newRoomId);
     }
 
-    //this.setExit(longestRoom);
+    let protectRoomId = this.popHighestDistanceRoom().id;
+    this.setExit(protectRoomId);
 
+    for (let i = 0; i < this.maxKeys; i++) {
+      let room = this.popHighestDistanceRoom();
+      if (!room) {
+        console.error('exhausted possible lockable rooms! giving up.');
+        break;
+      }
+      this.lock(protectRoomId - 1, room.id); // TODO: HACK: door between room and parent has ID of parentId - 1
+      protectRoomId = room.id;
+    }
 
     const {width, height} = this.squish();
 
     const grid = this.generateGrid(width, height);
 
-    const deadends = this.classifyRooms();
+    this.classifyRooms();
 
     return {
       size: {
@@ -108,7 +110,7 @@ class MazeKeyGen {
       terminals: {
         entrance: this.entrance,
         exit: this.exit,
-        deadends
+        deadends: this.deadends
       },
       rooms: this.rooms,
       grid,
@@ -143,14 +145,6 @@ class MazeKeyGen {
   }
 
   addRoom(x, y) {
-    for (let room of this.rooms) { // TODO: DON'T COMMIT
-      if (room.x === x && room.y === y) {
-        console.error('furthest', this.furthest);
-        console.error('new x, y', x, y);
-        console.error(room);
-        throw new Error("ROOM COLLISION!");
-      }
-    }
     const roomId = this.rooms.length;
 
     this.stretch(x, y);
@@ -217,7 +211,7 @@ class MazeKeyGen {
   }
 
   classifyRooms() {
-    const deadends = [];
+    this.deadends = [];
 
     for (const room of this.rooms) {
       let doors = 0;
@@ -227,7 +221,7 @@ class MazeKeyGen {
       if (room.doors.w !== null) doors++;
 
       if (doors === 1) { // D (Dead End)
-        deadends.push(room.id);
+        this.deadends.push(room.id);
         if (room.doors.n !== null) {
           room.template = 'D1';
         } else if (room.doors.e !== null) {
@@ -267,8 +261,6 @@ class MazeKeyGen {
         room.template = 'F1';
       }
     }
-
-    return deadends;
   }
 
   /**
@@ -281,10 +273,6 @@ class MazeKeyGen {
     const childRoom = this.rooms[childRoomId];
     const doorId = this.doors.length;
     let orientation = null;
-
-    console.log('addDoor', parentRoomId, childRoomId);
-    console.log('parent', parentRoom.x, parentRoom.y);
-    console.log('child', childRoom.x, childRoom.y);
 
     if (parentRoom.x === childRoom.x && parentRoom.y === childRoom.y - 1) {
       // R1 north of R2
@@ -312,6 +300,7 @@ class MazeKeyGen {
 
     parentRoom.children.add(childRoom);
     childRoom.distance = parentRoom.distance + 1;
+    this.registerRoomDistance(childRoom.id);
 
     this.doors.push({
       id: doorId,
@@ -324,8 +313,42 @@ class MazeKeyGen {
     return doorId;
   }
 
+  registerRoomDistance(roomId) {
+    let room = this.rooms[roomId];
+    let distance = room.distance;
+
+    if (!this.roomsByDistance.get(distance)) {
+      this.roomsByDistance.set(distance, new Set());
+    }
+
+    this.roomsByDistance.get(distance).add(room);
+
+    if (distance > this.maxDistance) {
+      this.maxDistance = distance;
+    }
+  }
+
+  popHighestDistanceRoom() {
+    let collection = this.roomsByDistance.get(this.maxDistance);
+
+    if (!collection) {
+      return null; // Nothing left!
+    }
+
+    let item = collection.values().next().value;
+
+    collection.delete(item);
+
+    if (collection.size === 0) {
+      this.roomsByDistance.delete(this.maxDistance);
+      this.maxDistance--;
+    }
+
+    return item;
+  }
+
   /**
-   * Locks a door, generating a key
+   * Locks a door, putting the key in the specified room
    * @return keyId
    */
   lock(doorId, roomId) {
