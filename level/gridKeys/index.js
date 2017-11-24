@@ -7,6 +7,16 @@ class MazeKeyGen {
     this.maxRooms = rooms;
     this.maxKeys = keys;
 
+    if (this.maxRooms < 2) {
+      console.error(`Room count ${this.maxRooms} needs to be at least two (entrance and exit).`);
+      this.maxRooms = 2;
+    }
+
+    if (this.maxKeys > this.maxRooms - 2) {
+      console.error(`Key count ${this.maxKeys} is greater than rooms ${this.maxRooms} minus two (entrance and exit). Reducing keys by two.`);
+      this.maxKeys = this.maxRooms - 2;
+    }
+
     this.reset();
   }
 
@@ -43,7 +53,7 @@ class MazeKeyGen {
       w: new Map()  // Y => roomId
     };
 
-    this.roomsByDistance = new Map();
+    this.lockPool = new Map();
     this.maxDistance = 0;
   }
 
@@ -83,17 +93,32 @@ class MazeKeyGen {
       const d = this.addDoor(parentRoom.id, newRoomId);
     }
 
-    let protectRoomId = this.popHighestDistanceRoom().id;
-    this.setExit(protectRoomId);
+    const CHILD_THRESHOLD = this.rooms.length / (this.maxKeys + 1);
+
+    let roomToBeLocked = this.getHighestDistanceRoom().id;
+    this.setExit(roomToBeLocked);
 
     for (let i = 0; i < this.maxKeys; i++) {
-      let room = this.popHighestDistanceRoom();
-      if (!room) {
+      let ascended = this.findRoomParentWithAtMostChildren(this.rooms[roomToBeLocked], CHILD_THRESHOLD);
+
+      if (!ascended) {
         console.error('exhausted possible lockable rooms! giving up.');
         break;
       }
-      this.lock(protectRoomId - 1, room.id); // TODO: HACK: door between room and parent has ID of parentId - 1
-      protectRoomId = room.id;
+
+      this.removeRoomAndChildrenFromLockPool(ascended);
+      this.decrementChildrenCountAllParents(ascended);
+
+      let roomToPutKeyIn = this.getHighestDistanceRoom();
+
+      if (!roomToPutKeyIn) {
+        console.error('Cannot find a room to put a key in! Cancelling lock. Level should still be beatable.');
+        break;
+      }
+
+      this.lock(ascended.id - 1, roomToPutKeyIn.id); // TODO: HACK: door between room and parent has ID of parentId - 1
+
+      roomToBeLocked = roomToPutKeyIn.id;
     }
 
     const {width, height} = this.squish();
@@ -112,8 +137,12 @@ class MazeKeyGen {
         exit: this.exit,
         deadends: this.deadends
       },
+      //rooms: this.rooms,
       rooms: this.rooms.map(r => {
+        // Hide internal data structures from outside world
         delete r.children;
+        delete r.childrenCount;
+        delete r.parent;
         return r;
       }),
       doors: this.doors.map(d => {
@@ -156,6 +185,8 @@ class MazeKeyGen {
       x,
       y,
       children: new Set(),
+      childrenCount: 0,
+      parent: null,
       keyInRoom: null,
       template: 'F1',
       distance: roomId === 0 ? 0 : null, // Distance from room[0] / spawn
@@ -301,7 +332,9 @@ class MazeKeyGen {
 
     parentRoom.children.add(childRoom);
     childRoom.distance = parentRoom.distance + 1;
-    this.registerRoomDistance(childRoom.id);
+    childRoom.parent = parentRoom;
+    this.increaseChildrenCountAllParents(childRoom);
+    this.registerRoomDistanceLockPool(childRoom.id);
 
     this.doors.push({
       id: doorId,
@@ -314,38 +347,92 @@ class MazeKeyGen {
     return doorId;
   }
 
-  registerRoomDistance(roomId) {
+  increaseChildrenCountAllParents(room) {
+    while (room = room.parent) {
+      room.childrenCount++;
+    }
+  }
+
+  registerRoomDistanceLockPool(roomId) {
     let room = this.rooms[roomId];
     let distance = room.distance;
 
-    if (!this.roomsByDistance.get(distance)) {
-      this.roomsByDistance.set(distance, new Set());
+    if (!this.lockPool.get(distance)) {
+      this.lockPool.set(distance, new Set());
     }
 
-    this.roomsByDistance.get(distance).add(room);
+    this.lockPool.get(distance).add(room);
 
     if (distance > this.maxDistance) {
       this.maxDistance = distance;
     }
   }
 
-  popHighestDistanceRoom() {
-    let collection = this.roomsByDistance.get(this.maxDistance);
+  removeFromLockPool(room) {
+    let distance = room.distance
 
-    if (!collection) {
-      return null; // Nothing left!
+    let pool = this.lockPool.get(distance);
+
+    if (!pool) {
+      console.error(`no pool of depth ${distance}`);
+      return;
     }
 
-    let item = collection.values().next().value;
+    pool.delete(room);
 
-    collection.delete(item);
+    //if (pool.size === 0) {
+      //console.log('pool is now empty, removing pool');
+      //console.log(`this should be deepest room total! my: ${distance}, max: ${this.maxDistance}`);
+      //this.lockPool.delete(pool);
+      ////this.maxDistance--; // get removed out of order
+    //}
+  }
 
-    if (collection.size === 0) {
-      this.roomsByDistance.delete(this.maxDistance);
-      this.maxDistance--;
+  getHighestDistanceRoom() {
+    for (let i = this.maxDistance; i > 0; i--) { // TODO: This is slow, iterates every distance pool
+      let collection = this.lockPool.get(i);
+
+      if (!collection.size) {
+        continue;
+      }
+
+      let item = collection.values().next().value;
+
+      return item;
     }
 
-    return item;
+    return null;
+  }
+
+  findRoomParentWithAtMostChildren(room, count) {
+    if (!room) {
+      throw new Error('bad room');
+    }
+    let parent;
+    while (parent = room.parent) {
+      if ((parent.childrenCount+1) > count) {
+        return room;
+      }
+      room = parent;
+    }
+
+    return room;
+  }
+
+  decrementChildrenCountAllParents(room) {
+    let decrementCount = room.childrenCount + 1;
+    while (room) {
+      room.childrenCount -= decrementCount;
+      room = room.parent;
+    }
+  }
+
+  removeRoomAndChildrenFromLockPool(room) {
+    this.removeFromLockPool(room);
+    for (let child of room.children) {
+      this.removeFromLockPool(child);
+      this.removeRoomAndChildrenFromLockPool(child);
+    }
   }
 
   /**

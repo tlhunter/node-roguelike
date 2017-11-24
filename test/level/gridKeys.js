@@ -15,7 +15,7 @@ const KEY_COLORS = {
 };
 
 const ROOMS = Number(process.argv[2]) || 100;
-const KEYS = Number(process.argv[3]) || 6;
+const KEYS = Number(process.argv[3]) || 0;
 
 const start = Date.now();
 const level = new MazeKeyGen({rooms: ROOMS, keys: KEYS});
@@ -72,4 +72,11 @@ console.log(`Entrance: ${result.terminals.entrance}, Exit: ${result.terminals.ex
 console.log(`Keys/Locks: ${result.keys.length}`);
 console.log(`Time to Generate: ${time}ms`);
 
-console.log(JSON.stringify(result));
+//console.log(result);
+const s2 = Date.now();
+for (let i = 0; i < 10000; i++) {
+  const l2 = new MazeKeyGen({rooms: 100, keys: 10});
+  const r2 = l2.generate();
+}
+const t2 = Date.now() - s2;
+console.log('time to generate 10000 levels of 100 rooms and 10 keys', t2, 'ms');
