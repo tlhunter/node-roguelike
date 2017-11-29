@@ -11,9 +11,12 @@ npm install roguelike
 
 ##### Table of Contents
 
-* [Classic Roguelike Level Generator](#level-roguelike)
-* [Grid with Keys and Locks Level Generator](#level-gridKeys)
-* [Metroidvania with Odd Room Shapes](#level-metroidvania)
+* Level: [Classic Roguelike Level Generator](#level-roguelike)
+* Level: [Grid with Keys and Locks Level Generator](#level-gridKeys)
+* Level: [Metroidvania with Snaking Room Shapes](#level-metroidvania)
+* Room: [Odd Square Room Generator](#room-oddSquare)
+* Utility: [Random Functions](#utility-random)
+* Utility: [Grid Functions](#utility-grid)
 
 <a name="level-roguelike"></a>
 ## `roguelike/level/roguelike`: Classic Roguelike Level Generator
@@ -493,7 +496,7 @@ In theory you can simply design one level for each letter and then rotate them f
 
 
 <a name="level-metroidvania"></a>
-## `roguelike/level/metroidvania`: Metroidvania with Odd Room Shapes
+## `roguelike/level/metroidvania`: Metroidvania with Snaking Room Shapes
 
 This level generator is useful for creating Metroidvania style dungeons.
 Each individual unit in the grid is referred to as a zone.
@@ -769,3 +772,226 @@ It can be `exit` if this edge is a connection to another map.
   ]
 }
 ```
+
+<a name="room-oddSquare"></a>
+## `roguelike/room/oddSquare`: Odd Square Room Generator
+
+This room generator was designed to play nicely with [Grid with Keys and Locks Level Generator](#level-gridKeys)
+
+Rooms must always contain odd dimensions. Rooms will always be squares.
+
+### Example Generated Level
+
+Here's an example room of the **A1** (four doors) template:
+
+```
+#####/#####
+#.......,.#
+#.I.I.I.I.#
+#....,.,..#
+#.I.....I.#
+/....$..../
+#.I.....I.#
+#..,..,...#
+#.I.I.I.I.#
+#.,......,#
+#####/#####
+```
+
+The capital I's represent pillars. The #'s represent walls. The /'s represent doors. The periods represent floor. The comma is floor with non-blocking litter. The `$` is treasure.
+
+### Usage
+
+The `type` property is described at in the section on [Room Types](#room-types).
+
+```javascript
+const LevelRoguelike = require('roguelike/room/oddSquare');
+
+const gen = new Gen({
+  size: 5
+});
+
+const room = gen.generate({
+  type: 'E2',
+  pillars: true,
+  treasure: true,
+  litter: true
+});
+```
+
+### Example Output
+
+The `size` property contains the dimensions of the room. The `center` property is the calculated center coordinate of the room. The `doors` property is an array of door objects.
+
+The `layers` property contains four different layers. The `composite` layer is interesting in that it contains essentially a summary of the other three layers.
+
+#### Output JSON
+
+```json
+{
+  "size": {
+    "width": 5,
+    "height": 5
+  },
+  "center": {
+    "x": 2,
+    "y": 2
+  },
+  "type": "E2",
+  "doors": [
+    {
+      "direction": "n",
+      "orientation": "v",
+      "x": 2,
+      "y": 0
+    },
+    {
+      "direction": "e",
+      "orientation": "h",
+      "x": 4,
+      "y": 2
+    },
+    {
+      "direction": "s",
+      "orientation": "v",
+      "x": 2,
+      "y": 4
+    }
+  ],
+  "layers": {
+    "composite": [
+      [
+        { "x": 0, "y": 0, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 1, "y": 0, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 2, "y": 0, "door": "n", "wall": false, "block": "special", "protected": true },
+        { "x": 3, "y": 0, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 4, "y": 0, "door": null, "wall": true, "block": true, "protected": false }
+      ],
+      [
+        { "x": 0, "y": 1, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 1, "y": 1, "door": null, "wall": false, "block": false, "protected": true },
+        { "x": 2, "y": 1, "door": null, "wall": false, "block": false, "protected": true, "litter": true },
+        { "x": 3, "y": 1, "door": null, "wall": false, "block": false, "protected": true },
+        { "x": 4, "y": 1, "door": null, "wall": true, "block": true, "protected": false }
+      ],
+      [
+        { "x": 0, "y": 2, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 1, "y": 2, "door": null, "wall": false, "block": false, "protected": true },
+        { "x": 2, "y": 2, "door": null, "wall": false, "block": "special", "protected": true, "treasure": true },
+        { "x": 3, "y": 2, "door": null, "wall": false, "block": false, "protected": true, "litter": true },
+        { "x": 4, "y": 2, "door": "e", "wall": false, "block": "special", "protected": true }
+      ],
+      [
+        { "x": 0, "y": 3, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 1, "y": 3, "door": null, "wall": false, "block": false, "protected": true },
+        { "x": 2, "y": 3, "door": null, "wall": false, "block": false, "protected": true },
+        { "x": 3, "y": 3, "door": null, "wall": false, "block": false, "protected": true, "litter": true },
+        { "x": 4, "y": 3, "door": null, "wall": true, "block": true, "protected": false }
+      ],
+      [
+        { "x": 0, "y": 4, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 1, "y": 4, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 2, "y": 4, "door": "s", "wall": false, "block": "special", "protected": true },
+        { "x": 3, "y": 4, "door": null, "wall": true, "block": true, "protected": false },
+        { "x": 4, "y": 4, "door": null, "wall": true, "block": true, "protected": false }
+      ]
+    ],
+    "floor": [
+      [ "solid", "solid", "solid", "solid", "solid" ],
+      [ "solid", "solid", "litter", "solid", "solid" ],
+      [ "solid", "solid", "solid", "litter", "solid" ],
+      [ "solid", "solid", "solid", "litter", "solid" ],
+      [ "solid", "solid", "solid", "solid", "solid" ]
+    ],
+    "mid": [
+      [ "wall", "wall", "door", "wall", "wall" ],
+      [ "wall", null, null, null, "wall" ],
+      [ "wall", null, "treasure", null, "door" ],
+      [ "wall", null, null, null, "wall" ],
+      [ "wall", "wall", "door", "wall", "wall" ]
+    ],
+    "ceiling": [
+      [ null, null, null, null, null ],
+      [ null, null, null, null, null ],
+      [ null, null, null, null, null ],
+      [ null, null, null, null, null ],
+      [ null, null, null, null, null ]
+    ]
+  }
+}
+
+```
+
+<a name="utility-random"></a>
+## `roguelike/utility/random`: Utility Random
+
+These are useful random functions which I find myself rewriting for many games.
+
+### Usage
+
+```javascript
+const random = require('roguelike/utility/random');
+```
+
+### `random.shuffle(array)`
+
+Returns an array where the element order has been randomized
+
+### `random.range(minInteger, maxInteger)`
+
+Returns an integer between the supplied integers, inclusive.
+
+### `random.randomElement(array)`
+
+Returns a random element from the given array.
+
+### `random.randomElementWeighted(array, weightArray)`
+
+Returns a random element from `array`, based on the weights provided in `weightArray`. As an example, consider the following:
+
+```javascript
+let result = random.randomElementWeighted(['A', 'B'], [1, 2]);
+console.log(result);
+// result is 33% likely to be A and 67% likely to be B
+```
+
+### `random.decide(floatThreshold)`
+
+Makes a decision (returns a boolean) based on the supplied `floatThreshold`. Here's an example:
+
+```javascript
+let result = random.decide(0.7);
+console.log(result);
+// Result is 70% likely to be true and 30% likely to be false
+```
+
+<a name="utility-grid"></a>
+## `roguelike/utility/grid`: Utility Grid
+
+Utility functions for working with a 2d grid. Each function makes use of points. The only properties used with a point are `point.x` and `point.y`, both of which need to be integers.
+
+### Usage
+
+```javascript
+const grid = require('roguelike/utility/grid');
+```
+
+### `grid.adjacent(p1, p2)`
+
+Returns true if `p2` is immediately North, East, South, or West of `p1`.
+
+### `grid.line(p1, p2)`
+
+Implementation of **Bresenham's Line Algorithm**. Generates a line between two points. These lines are guaranteed to be "walkable", e.g. neighbors will always touch along cardinal directions. Returns an array of points.
+
+### `grid.distance(p1, p2)`
+
+Returns a floating point number representing the distance between the two points.
+
+### `grid.fastDistance(p1, p2)`
+
+Returns an integer representing a very fake distance. This distance is simply the max absolute value difference between either the X or Y coordinates.
+
+### `grid.sameSpot(p1, p2)`
+
+Returns a boolean of whether or not the two points occupy the same coordinate.
