@@ -249,6 +249,7 @@ class Generator {
   // Make adjacent squares protected
   addTreasure() {
     let c = this.focalpoint;
+
     for (let y = c.y - 1; y <= c.y + 1; y++) {
       for (let x = c.x - 1; x <= c.x + 1; x++) {
         this.setProtect(x, y);
@@ -325,7 +326,7 @@ class Generator {
         doorstop.y = d.y;
       }
 
-      let line = grid.line(this.focalpoint, doorstop);
+      let line = grid.line(this.focalpoint, doorstop, true);
 
       for (let p of line) {
         this.setProtect(p.x, p.y);

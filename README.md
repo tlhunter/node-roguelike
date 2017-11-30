@@ -980,9 +980,9 @@ const grid = require('roguelike/utility/grid');
 
 Returns true if `p2` is immediately North, East, South, or West of `p1`.
 
-### `grid.line(p1, p2)`
+### `grid.line(p1, p2, cardinal)`
 
-Implementation of **Bresenham's Line Algorithm**. Generates a line between two points. Tiles won't be cardinal neighbors. Returns an array of points.
+Implementation of **Bresenham's Line Algorithm**. Generates a line between two points. Tiles won't be cardinal neighbors unless you set `cardinal` to true. Returns an array of points.
 
 ### `grid.distance(p1, p2)`
 

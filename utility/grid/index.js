@@ -13,7 +13,7 @@ module.exports = {
    *
    * http://stackoverflow.com/a/4672319/538646
    */
-  line(start, end) {
+  line(start, end, cardinal = false) {
     let points = [];
     let x = start.x;
     let y = start.y;
@@ -46,6 +46,14 @@ module.exports = {
       }
 
       let e2 = 2 * err;
+
+      // Added by @tlhunter to make walkable lines
+      if (cardinal && e2 > -dy && e2 < dx) {
+        points.push({
+          x: x + sx, // Simply shift X ahead but not Y
+          y: y // Could have done Y and not X
+        });
+      }
 
       if (e2 > -dy) {
         err -= dy;
