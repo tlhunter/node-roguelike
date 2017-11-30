@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const colors = require('colors/safe');
+
 const Gen = require('../../room/oddSquare/index.js');
 
 makeRoom('A1', 17, true, true, true, false);
@@ -31,23 +33,37 @@ function makeRoom(type, size, pillars, treasure, litter, chasm) {
     for (let x = 0; x < room.size.width; x++) {
       let mid = room.layers.mid[y][x];
       let floor = room.layers.floor[y][x];
+      let char;
       if (mid === 'wall') {
-        row += '#';
+        char = '#';
       } else if (mid === 'door') {
-        row += '/';
+        char = '/';
       } else if (mid === 'pillar') {
-        row += 'I';
+        char = 'I';
       } else if (mid === 'treasure') {
-        row += '$';
+        char = '$';
       } else {
         if (floor === 'litter') {
-          row += ',';
+          char = ',';
         } else if (floor === 'chasm') {
-          row += ' ';
+          char = ' ';
         } else {
-          row += '.';
+          char = '.';
         }
       }
+
+      let c = room.layers.composite[y][x];
+      if (c.protected) {
+        char = colors.inverse(char);
+      }
+
+      if (c.block === 'special' ) {
+          char = colors.cyan(char);
+      } else if (c.block === true) {
+        char = colors.red(char);
+      }
+
+      row += char;
     }
     console.log(row);
   }

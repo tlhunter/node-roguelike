@@ -1,4 +1,6 @@
 const random = require('../../utility/random');
+const grid = require('../../utility/grid');
+
 const MIN_SIZE = 5;
 const MAX_SIZE = 17;
 
@@ -106,10 +108,14 @@ class Generator {
     this.type = opts.type;
     this.chasm = !!opts.chasm;
 
-    // TODO: Shift this randomly, draw protection lines from door stoop
     this.center = {
       x: Math.floor(this.size / 2),
       y: Math.floor(this.size / 2)
+    };
+
+    this.focalpoint = {
+      x: random.range(2, this.size - 2),
+      y: random.range(2, this.size - 2)
     };
 
     this.layers = this.emptyLayers();
@@ -129,6 +135,7 @@ class Generator {
         height: this.size
       },
       center: this.center,
+      focalpoint: this.focalpoint,
       type: this.type,
       chasm: this.chasm,
       doors: this.doors,
@@ -241,7 +248,7 @@ class Generator {
   // Stick treasure in center of room
   // Make adjacent squares protected
   addTreasure() {
-    let c = this.center;
+    let c = this.focalpoint;
     for (let y = c.y - 1; y <= c.y + 1; y++) {
       for (let x = c.x - 1; x <= c.x + 1; x++) {
         this.setProtect(x, y);
@@ -299,19 +306,31 @@ class Generator {
   }
 
   basicProtection() {
-    let c = this.center;
-    let iter;
     for (let d of this.doors) {
-      if (d.x === c.x) {
-        iter = d.y < c.y ? 1 : -1;
-        for (let y = d.y; y != c.y; y += iter) this.setProtect(d.x, y);
-      } else if (d.y === c.y) {
-        iter = d.x < c.x ? 1 : -1;
-        for (let x = d.x; x != c.x; x += iter) this.setProtect(x, d.y);
+      this.setProtect(d.x, d.y);
+
+      let doorstop = {x: null, y: null};
+
+      if (d.direction === 'n') {
+        doorstop.x = d.x;
+        doorstop.y = d.y + 1;
+      } else if (d.direction === 'e') {
+        doorstop.x = d.x - 1;
+        doorstop.y = d.y;
+      } else if (d.direction === 's') {
+        doorstop.x = d.x;
+        doorstop.y = d.y - 1;
+      } else if (d.direction === 'w') {
+        doorstop.x = d.x + 1;
+        doorstop.y = d.y;
+      }
+
+      let line = grid.line(this.focalpoint, doorstop);
+
+      for (let p of line) {
+        this.setProtect(p.x, p.y);
       }
     }
-
-    this.setProtect(c.x, c.y);
   }
 
   setProtect(x, y, protect = true) {

@@ -982,7 +982,7 @@ Returns true if `p2` is immediately North, East, South, or West of `p1`.
 
 ### `grid.line(p1, p2)`
 
-Implementation of **Bresenham's Line Algorithm**. Generates a line between two points. These lines are guaranteed to be "walkable", e.g. neighbors will always touch along cardinal directions. Returns an array of points.
+Implementation of **Bresenham's Line Algorithm**. Generates a line between two points. Tiles won't be cardinal neighbors. Returns an array of points.
 
 ### `grid.distance(p1, p2)`
 
