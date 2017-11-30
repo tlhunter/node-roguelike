@@ -2,13 +2,14 @@
 
 const Gen = require('../../room/oddSquare/index.js');
 
-makeRoom('A1', 17, true, true, true);
-makeRoom('E3', 7, false, false, true);
-makeRoom('C1', 11, false, true, true);
-makeRoom('F1', 5, false, false, false);
-//makeRoom('E2', 5, true, true, true);
+makeRoom('A1', 17, true, true, true, false);
+makeRoom('E3', 7, false, false, true, false);
+makeRoom('C1', 11, false, true, true, false);
+makeRoom('F1', 5, false, false, false, false);
+makeRoom('E4', 13, false, true, true, true);
+//makeRoom('E2', 5, true, true, true, false);
 
-function makeRoom(type, size, pillars, treasure, litter) {
+function makeRoom(type, size, pillars, treasure, litter, chasm) {
   const start = Date.now();
   const gen = new Gen({
     size
@@ -18,7 +19,9 @@ function makeRoom(type, size, pillars, treasure, litter) {
     type,
     pillars,
     treasure,
-    litter
+    litter,
+    chasm,
+    holes: chasm
   });
 
   const end = Date.now() - start;
@@ -39,6 +42,8 @@ function makeRoom(type, size, pillars, treasure, litter) {
       } else {
         if (floor === 'litter') {
           row += ',';
+        } else if (floor === 'chasm') {
+          row += ' ';
         } else {
           row += '.';
         }

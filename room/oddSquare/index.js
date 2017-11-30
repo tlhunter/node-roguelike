@@ -1,6 +1,6 @@
 const random = require('../../utility/random');
 const MIN_SIZE = 5;
-const MAX_SIZE = 11;
+const MAX_SIZE = 17;
 
 const EDGE = {
   WALL: 'wall',
@@ -13,8 +13,8 @@ const DEFAULTS = {
   treasure: false,
   litter: false,
   pillars: true,
-  //holes: true,
-  //edge: EDGE.WALL,
+  chasm: false,
+  holes: false,
   //traps: true,
   //enemies: true,
   //water: false
@@ -57,6 +57,8 @@ const ROOM_TYPES = {
 };
 
 const FLOOR = {
+  CHASM: 'chasm',
+  BRIDGE: 'bridge',
   SOLID: 'solid',
   LITTER: 'litter'
 };
@@ -74,6 +76,7 @@ const CEILING = {
 const BLOCK = {
   BLOCK: true,
   SPECIAL: 'special', // Can be walked to / activated but not walked through
+  FALL: 'fall', // Entity would fall, up to game if this should block
   FREE: false
 };
 
@@ -101,7 +104,9 @@ class Generator {
 
     this.size = opts.size;
     this.type = opts.type;
+    this.chasm = !!opts.chasm;
 
+    // TODO: Shift this randomly, draw protection lines from door stoop
     this.center = {
       x: Math.floor(this.size / 2),
       y: Math.floor(this.size / 2)
@@ -115,6 +120,7 @@ class Generator {
     if (opts.treasure) this.addTreasure();
     if (opts.pillars) this.addPillars();
 
+    if (opts.holes) this.addHoles();
     if (opts.litter) this.addLitter(); // Do last
 
     return {
@@ -124,6 +130,7 @@ class Generator {
       },
       center: this.center,
       type: this.type,
+      chasm: this.chasm,
       doors: this.doors,
       layers: this.layers
     };
@@ -132,19 +139,27 @@ class Generator {
   basicLayout() {
     for (let y = 0; y < this.size; y++) {
       for (let x = 0; x < this.size; x++) {
-        // Floors
-        this.layers.floor[y][x] = FLOOR.SOLID;
-
         // Doors
         let door = this.getDoor(x, y);
         this.layers.composite[y][x] = Generator.roomTemplate({x, y, door});
+
+        // Floors
+        if (this.chasm && (y === 0 || x === 0 || y === this.size-1 || x === this.size-1)) {
+          this.layers.floor[y][x] = FLOOR.CHASM;
+          this.layers.composite[y][x].block = BLOCK.FALL;
+          this.layers.composite[y][x].bridge = true;
+        } else {
+          this.layers.floor[y][x] = FLOOR.SOLID;
+        }
+
         if (door) {
           this.layers.mid[y][x] = MID.DOOR;
           this.layers.composite[y][x].block = BLOCK.SPECIAL;
+          if (this.chasm) this.layers.floor[y][x] = FLOOR.BRIDGE;
         }
 
         // Walls
-        if (!door && (x === 0 || y === 0 || x === this.size - 1 || y === this.size - 1)) {
+        if (!this.chasm && !door && (x === 0 || y === 0 || x === this.size - 1 || y === this.size - 1)) {
           this.layers.composite[y][x].wall = true;
           this.layers.composite[y][x].block = true;
           this.layers.mid[y][x] = MID.WALL;
@@ -253,7 +268,7 @@ class Generator {
 
   // Litter is passable, simple visual clutter
   addLitter() {
-    let litter = this.size - 2; // Amonut of litter is square root of area (minus outer walls)
+    let litter = this.size - 2; // Amount of litter is square root of area (minus outer walls)
     let limit = this.size * 3; // how many passes before we give up
     while (litter > 0 && limit > 0) {
       let x = random.range(0, this.size);
@@ -262,6 +277,22 @@ class Generator {
         litter--;
         this.layers.floor[y][x] = FLOOR.LITTER;
         this.layers.composite[y][x].litter = true;
+      }
+      limit--;
+    }
+  }
+
+  addHoles() {
+    let holes = this.size - 2; // Amount of holes is square root of area (minus outer walls)
+    let limit = this.size * 3; // how many passes before we give up
+    while (holes > 0 && limit > 0) {
+      let x = random.range(0, this.size);
+      let y = random.range(0, this.size);
+      if (!this.isProtected(x, y) && !this.isBlocked(x, y)) {
+        holes--;
+        this.layers.floor[y][x] = FLOOR.CHASM;
+        this.layers.composite[y][x].chasm = true;
+        this.layers.composite[y][x].block = BLOCK.FALL;
       }
       limit--;
     }
