@@ -805,7 +805,7 @@ The capital I's represent pillars. The #'s represent walls. The /'s represent do
 The `type` property is described at in the section on [Room Types](#room-types).
 
 ```javascript
-const LevelRoguelike = require('roguelike/room/oddSquare');
+const Gen = require('roguelike/room/oddSquare');
 
 const gen = new Gen({
   size: 5
