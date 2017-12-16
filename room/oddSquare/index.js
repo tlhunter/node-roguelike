@@ -114,8 +114,8 @@ class Generator {
     };
 
     this.focalpoint = {
-      x: random.range(2, this.size - 2),
-      y: random.range(2, this.size - 2)
+      x: random.range(2, this.size - 3),
+      y: random.range(2, this.size - 3)
     };
 
     this.layers = this.emptyLayers();
@@ -279,8 +279,8 @@ class Generator {
     let litter = this.size - 2; // Amount of litter is square root of area (minus outer walls)
     let limit = this.size * 3; // how many passes before we give up
     while (litter > 0 && limit > 0) {
-      let x = random.range(0, this.size);
-      let y = random.range(0, this.size);
+      let x = random.range(0, this.size-1);
+      let y = random.range(0, this.size-1);
       if (!this.isBlocked(x, y)) {
         litter--;
         this.layers.floor[y][x] = FLOOR.LITTER;
@@ -294,8 +294,8 @@ class Generator {
     let holes = this.size - 2; // Amount of holes is square root of area (minus outer walls)
     let limit = this.size * 3; // how many passes before we give up
     while (holes > 0 && limit > 0) {
-      let x = random.range(0, this.size);
-      let y = random.range(0, this.size);
+      let x = random.range(0, this.size-1);
+      let y = random.range(0, this.size-1);
       if (!this.isProtected(x, y) && !this.isBlocked(x, y)) {
         holes--;
         this.layers.floor[y][x] = FLOOR.CHASM;
