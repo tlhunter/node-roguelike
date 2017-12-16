@@ -9,7 +9,7 @@ module.exports = {
    * Get a random integer between min and max, inclusive
    */
   range(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
+    return Math.floor(Math.random() * ((max+1) - min)) + min;
   },
 
   /**
