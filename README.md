@@ -995,3 +995,9 @@ Returns an integer representing a very fake distance. This distance is simply th
 ### `grid.sameSpot(p1, p2)`
 
 Returns a boolean of whether or not the two points occupy the same coordinate.
+
+### `grid.ahead(point, direction, distance=1)`
+
+Returns a new point, `distance` units away from the origin `point`, in the supplied `direction`. The direction must be one of `north`, `east`, `south`, `west`.
+
+Will throw a `TypeError` if the supplied `direction` is invalid.

@@ -1,3 +1,10 @@
+const DIRS = {
+  north: {x: 0, y: -1},
+  east: {x: 1, y: 0},
+  south: {x: 0, y: 1},
+  west: {x: -1, y: 0}
+};
+
 module.exports = {
   /**
    * Are these two points cardinal adjacent?
@@ -69,6 +76,9 @@ module.exports = {
     return points;
   },
 
+  /**
+   * Returns the exact distance between two points
+   */
   distance(p1, p2) {
     const x_diff = p1.x - p2.x;
     const y_diff = p1.y - p2.y;
@@ -84,5 +94,21 @@ module.exports = {
 
   sameSpot(p1, p2) {
     return p1.x === p2.x && p1.y === p2.y;
+  },
+
+  /**
+   * Extrapolates a point of the given distance away in a certain direction from the origin
+   */
+  ahead(origin, direction, distance=1) {
+    if (!DIRS[direction]) {
+      throw new TypeError(`direction "${direction}" must be of north, east, south, west`);
+    }
+
+    const diff = DIRS[direction];
+
+    return {
+      x: origin.x + diff.x * distance,
+      y: origin.y + diff.y * distance
+    };
   }
 };
