@@ -149,7 +149,7 @@ class Generator {
   }
 
   basicLayout() {
-    const radius = Math.ceil(this.size / 2);
+    const radius = Math.ceil(this.size / 2) - 1;
     for (let y = 0; y < this.size; y++) {
       for (let x = 0; x < this.size; x++) {
         // Doors
@@ -319,9 +319,11 @@ class Generator {
       for (let i = 0; i < this.size; i++) {
         const x = anchor.mode === 'x' ? anchor.value : i;
         const y = anchor.mode === 'y' ? anchor.value : i;
-        this.layers.floor[y][x] = FLOOR.CHASM;
-        this.layers.composite[y][x].chasm = true;
-        this.layers.composite[y][x].block = BLOCK.FALL;
+        if (!this.isProtected(x, y)) {
+          this.layers.floor[y][x] = FLOOR.CHASM;
+          this.layers.composite[y][x].chasm = true;
+          this.layers.composite[y][x].block = BLOCK.FALL;
+        }
       }
     }
   }
