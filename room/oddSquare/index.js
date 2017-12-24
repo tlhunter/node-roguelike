@@ -128,10 +128,10 @@ class Generator {
     this.basicProtection();
 
     if (opts.treasure) this.addTreasure();
-    if (opts.pillars) this.addPillars();
 
     if (opts.gashes) this.addGashes();
     if (opts.holes) this.addHoles();
+    if (opts.pillars) this.addPillars();
     if (opts.litter) this.addLitter(); // Do last
 
     return {
@@ -149,7 +149,7 @@ class Generator {
   }
 
   basicLayout() {
-    const radius = Math.ceil(this.size / 2) - 1;
+    const radius = Math.ceil(this.size / 2) - 1.5;
     for (let y = 0; y < this.size; y++) {
       for (let x = 0; x < this.size; x++) {
         // Doors
@@ -281,6 +281,7 @@ class Generator {
     for (let y = 2; y < this.size - 2; y += 2) {
       for (let x = 2; x < this.size - 2; x += 2) {
         if (this.isProtected(x, y)) continue;
+        if (this.layers.floor[y][x] !== FLOOR.SOLID) continue;
         this.layers.mid[y][x] = MID.PILLAR;
         this.layers.composite[y][x].pillar = true;
         this.layers.composite[y][x].block = BLOCK.BLOCK;
