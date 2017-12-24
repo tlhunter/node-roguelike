@@ -815,7 +815,11 @@ const room = gen.generate({
   type: 'E2',
   pillars: true,
   treasure: true,
-  litter: true
+  litter: true, // Adds non-blocking decorations
+  chasm: true, // Surroundings is "emptyness" as opposed to walls
+  holes: true, // Adds random holes
+  circle: true, // Generates a circular room, must be combined with chasm
+  gashes: 2 // Number of gashes (empty lines) to add
 });
 ```
 

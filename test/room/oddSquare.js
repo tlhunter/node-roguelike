@@ -9,9 +9,10 @@ makeRoom('E3', 7, false, false, true, false);
 makeRoom('C1', 11, false, true, true, false);
 makeRoom('F1', 5, false, false, false, false);
 makeRoom('E4', 13, false, true, true, true);
+makeRoom('E4', 11, false, true, true, true, true, 2);
 //makeRoom('E2', 5, true, true, true, false);
 
-function makeRoom(type, size, pillars, treasure, litter, chasm) {
+function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes) {
   const start = Date.now();
   const gen = new Gen({
     size
@@ -23,6 +24,8 @@ function makeRoom(type, size, pillars, treasure, litter, chasm) {
     treasure,
     litter,
     chasm,
+    circle,
+    gashes,
     holes: chasm
   });
 

@@ -17,6 +17,8 @@ const DEFAULTS = {
   pillars: true,
   chasm: false,
   holes: false,
+  circle: false,
+  gashes: 0,
   //traps: true,
   //enemies: true,
   //water: false
@@ -107,6 +109,8 @@ class Generator {
     this.size = opts.size;
     this.type = opts.type;
     this.chasm = !!opts.chasm;
+    this.circle = !!opts.circle;
+    this.gashes = Number(opts.gashes);
 
     this.center = {
       x: Math.floor(this.size / 2),
@@ -126,6 +130,7 @@ class Generator {
     if (opts.treasure) this.addTreasure();
     if (opts.pillars) this.addPillars();
 
+    if (opts.gashes) this.addGashes();
     if (opts.holes) this.addHoles();
     if (opts.litter) this.addLitter(); // Do last
 
@@ -144,6 +149,7 @@ class Generator {
   }
 
   basicLayout() {
+    const radius = Math.ceil(this.size / 2);
     for (let y = 0; y < this.size; y++) {
       for (let x = 0; x < this.size; x++) {
         // Doors
@@ -151,7 +157,15 @@ class Generator {
         this.layers.composite[y][x] = Generator.roomTemplate({x, y, door});
 
         // Floors
-        if (this.chasm && (y === 0 || x === 0 || y === this.size-1 || x === this.size-1)) {
+        if (this.chasm && this.circle) {
+          if (grid.distance({x, y}, this.center) <= radius) {
+            // TODO: This could easily be made faster, e.g. calculate each quadrant
+            this.layers.floor[y][x] = FLOOR.SOLID;
+          } else {
+            this.layers.floor[y][x] = FLOOR.CHASM;
+            this.layers.composite[y][x].block = BLOCK.FALL;
+          }
+        } else if (this.chasm && (y === 0 || x === 0 || y === this.size-1 || x === this.size-1)) {
           this.layers.floor[y][x] = FLOOR.CHASM;
           this.layers.composite[y][x].block = BLOCK.FALL;
           this.layers.composite[y][x].bridge = true;
@@ -287,6 +301,28 @@ class Generator {
         this.layers.composite[y][x].litter = true;
       }
       limit--;
+    }
+  }
+
+  addGashes() {
+    let potentials = [];
+
+    for (let i = 0; i < this.size * 2; i++) potentials.push(i);
+
+    potentials = random.shuffle(potentials).slice(0, this.gashes);
+
+    for (let gash of potentials) {
+      const anchor = gash <= this.size -1
+        ? { mode: 'x', value: gash }
+        : { mode: 'y', value: gash - this.size };
+
+      for (let i = 0; i < this.size; i++) {
+        const x = anchor.mode === 'x' ? anchor.value : i;
+        const y = anchor.mode === 'y' ? anchor.value : i;
+        this.layers.floor[y][x] = FLOOR.CHASM;
+        this.layers.composite[y][x].chasm = true;
+        this.layers.composite[y][x].block = BLOCK.FALL;
+      }
     }
   }
 
