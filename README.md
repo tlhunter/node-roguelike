@@ -816,11 +816,16 @@ const room = gen.generate({
   type: 'E2',
   pillars: true,
   treasure: true,
-  litter: true, // Adds non-blocking decorations
+  litter: 0.25, // 25% of free space (after decor) will be litter
   chasm: true, // Surroundings is "emptyness" as opposed to walls
   holes: true, // Adds random holes
   circle: true, // Generates a circular room, must be combined with chasm
-  gashes: 2 // Number of gashes (empty lines) to add
+  gashes: 2, // Number of gashes (empty lines) to add
+  decor: [ // Add blocking decoration to the map
+    {id: 'cobweb', rate: 0.1, location: 'any'}, // 10% of free tiles will be cobweb
+    {id: 'desk', count: 1, location: 'central'}, // 1 free tile not by a chasm will be a desk
+    {id: 'books', rate: 0.05, location: 'edge'} // 5% of free tiles by chasm will be books
+  ]
 });
 ```
 

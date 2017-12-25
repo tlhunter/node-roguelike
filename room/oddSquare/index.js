@@ -1,5 +1,6 @@
 const random = require('../../utility/random');
 const grid = require('../../utility/grid');
+const GridCollection = require('../../utility/gridCollection');
 
 const MIN_SIZE = 5;
 const MAX_SIZE = 17;
@@ -13,15 +14,18 @@ const EDGE = {
 const DEFAULTS = {
   size: 7,
   treasure: false,
-  litter: false,
-  pillars: true,
+  litter: 0.0,
   chasm: false,
   holes: false,
   circle: false,
-  gashes: 0,
-  //traps: true,
-  //enemies: true,
-  //water: false
+  decor: false, // TODO: Support destructable decor which can be placed on non-doorstop-protected tiles
+  gashes: 0
+};
+
+const DECOR_LOC = {
+  ANY: 'any',
+  CENTRAL: 'central',
+  EDGE: 'edge'
 };
 
 const LAYERS = [
@@ -50,13 +54,13 @@ const ROOM_TYPES = {
   D3: ['s'],
   D4: ['w'],
 
-  // E Shaped?
+  // E Shaped? More like a T...
   E1: ['n', 'e', 'w'],
   E2: ['n', 'e', 's'],
   E3: ['e', 's', 'w'],
   E4: ['n', 's', 'w'],
 
-  // Fucked
+  // Fucked? Gotta be a better name...
   F1: []
 };
 
@@ -79,6 +83,7 @@ const CEILING = {
 
 const BLOCK = {
   BLOCK: true,
+  DECOR: 'decor',
   SPECIAL: 'special', // Can be walked to / activated but not walked through
   FALL: 'fall', // Entity would fall, up to game if this should block
   FREE: false
@@ -111,6 +116,8 @@ class Generator {
     this.chasm = !!opts.chasm;
     this.circle = !!opts.circle;
     this.gashes = Number(opts.gashes);
+    this.litter = opts.litter;
+    this.decor = opts.decor && opts.decor.length ? opts.decor : false;
 
     this.center = {
       x: Math.floor(this.size / 2),
@@ -122,6 +129,8 @@ class Generator {
       y: random.range(2, this.size - 3)
     };
 
+    this.freeSpace = new GridCollection();
+
     this.layers = this.emptyLayers();
     this.doors = this.buildDoors();
     this.basic = this.basicLayout();
@@ -131,8 +140,11 @@ class Generator {
 
     if (opts.gashes) this.addGashes();
     if (opts.holes) this.addHoles();
-    if (opts.pillars) this.addPillars();
-    if (opts.litter) this.addLitter(); // Do last
+
+    const freeSpace = this.prepareFreeSpace();
+
+    if (opts.decor) this.addDecor(freeSpace);
+    if (opts.litter) this.addLitter(freeSpace); // Do last
 
     return {
       size: {
@@ -141,6 +153,7 @@ class Generator {
       },
       center: this.center,
       focalpoint: this.focalpoint,
+      freespace: Array.from(this.freeSpace.each()),
       type: this.type,
       chasm: this.chasm,
       doors: this.doors,
@@ -179,11 +192,16 @@ class Generator {
           if (this.chasm) this.layers.floor[y][x] = FLOOR.BRIDGE;
         }
 
+        if (this.layers.floor[y][x] === FLOOR.SOLID) {
+          this.freeSpace.add({x,y}, {});
+        }
+
         // Walls
         if (!this.chasm && !door && (x === 0 || y === 0 || x === this.size - 1 || y === this.size - 1)) {
           this.layers.composite[y][x].wall = true;
           this.layers.composite[y][x].block = true;
           this.layers.mid[y][x] = MID.WALL;
+          this.freeSpace.destroyAtCoordinate({x, y});
         }
       }
     }
@@ -275,33 +293,67 @@ class Generator {
     this.layers.mid[c.y][c.x] = MID.TREASURE;
   }
 
-  addPillars() {
-    if (this.size <= 5) return;
+  prepareFreeSpace() {
+    let freeSpace = random.shuffle(Array.from(this.freeSpace.each()));
 
-    for (let y = 2; y < this.size - 2; y += 2) {
-      for (let x = 2; x < this.size - 2; x += 2) {
-        if (this.isProtected(x, y)) continue;
-        if (this.layers.floor[y][x] !== FLOOR.SOLID) continue;
-        this.layers.mid[y][x] = MID.PILLAR;
-        this.layers.composite[y][x].pillar = true;
-        this.layers.composite[y][x].block = BLOCK.BLOCK;
+    // Tag each spot as being edge (cardinal near void) or not
+    const dirs = [
+      {x: 0, y: -1},
+      {x: 1, y: 0},
+      {x: 0, y: 1},
+      {x: -1, y: 0}
+    ];
+    for (let fs of freeSpace) {
+      fs.edge = false;
+      for (let dir of dirs) {
+        const d = {
+          x: fs.x + dir.x,
+          y: fs.y + dir.y
+        };
+        if (d.x < 0 || d.y < 0 || d.x >= this.size || d.y >= this.size) {
+          continue;
+        }
+        if (this.layers.floor[d.y][d.x] === FLOOR.CHASM) {
+          fs.edge = true;
+          break;
+        }
+      }
+    }
+
+    return freeSpace;
+  }
+
+  addDecor(freeSpace) {
+    let total = freeSpace.length;
+    for (let decor of this.decor) {
+      let count = decor.count ? decor.count : Math.ceil(decor.rate * total) || 0;
+      const loc = decor.location;
+      for (let fs of freeSpace) {
+        if (fs.flush) continue;
+        if (loc === DECOR_LOC.ANY || loc === DECOR_LOC.CENTRAL && !fs.edge || loc === DECOR_LOC.EDGE && fs.edge) {
+          this.layers.composite[fs.y][fs.x].decor = decor.id;
+          this.layers.composite[fs.y][fs.x].block = BLOCK.DECOR;
+          this.layers.mid[fs.y][fs.x] = decor.id;
+          this.freeSpace.destroyAtCoordinate({x: fs.x, y: fs.y});
+          fs.flush = true;
+          count--;
+          if (count <= 0) break;
+        }
       }
     }
   }
 
   // Litter is passable, simple visual clutter
-  addLitter() {
-    let litter = this.size - 2; // Amount of litter is square root of area (minus outer walls)
-    let limit = this.size * 3; // how many passes before we give up
-    while (litter > 0 && limit > 0) {
-      let x = random.range(0, this.size-1);
-      let y = random.range(0, this.size-1);
-      if (!this.isBlocked(x, y)) {
-        litter--;
-        this.layers.floor[y][x] = FLOOR.LITTER;
-        this.layers.composite[y][x].litter = true;
-      }
-      limit--;
+  addLitter(freeSpace) {
+    let count = Math.ceil(this.litter * freeSpace.length);
+
+    for (let fs of freeSpace) {
+      if (fs.flush) continue;
+      this.layers.floor[fs.y][fs.x] = FLOOR.LITTER;
+      this.layers.composite[fs.y][fs.x].litter = true;
+      // No need to remove from this.freeSpace since it's still free
+      count--;
+      if (count <= 0) break;
     }
   }
 
@@ -320,10 +372,11 @@ class Generator {
       for (let i = 0; i < this.size; i++) {
         const x = anchor.mode === 'x' ? anchor.value : i;
         const y = anchor.mode === 'y' ? anchor.value : i;
-        if (!this.isProtected(x, y)) {
+        if (!this.isProtected(x, y) && !this.layers.composite[y][x].wall) {
           this.layers.floor[y][x] = FLOOR.CHASM;
           this.layers.composite[y][x].chasm = true;
           this.layers.composite[y][x].block = BLOCK.FALL;
+          this.freeSpace.destroyAtCoordinate({x, y});
         }
       }
     }
@@ -340,6 +393,7 @@ class Generator {
         this.layers.floor[y][x] = FLOOR.CHASM;
         this.layers.composite[y][x].chasm = true;
         this.layers.composite[y][x].block = BLOCK.FALL;
+        this.freeSpace.destroyAtCoordinate({x, y});
       }
       limit--;
     }
@@ -374,6 +428,7 @@ class Generator {
   }
 
   setProtect(x, y, protect = true) {
+    if (protect) this.freeSpace.destroyAtCoordinate({x, y});
     this.layers.composite[y][x].protected = protect;
   }
 
