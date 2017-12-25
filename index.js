@@ -9,6 +9,7 @@ module.exports = {
   },
   utility: {
     grid: require('./utility/grid'),
+    gridCollection: require('./utility/gridCollection'),
     random: require('./utility/random')
   }
 };

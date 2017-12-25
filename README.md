@@ -17,6 +17,7 @@ npm install roguelike
 * Room: [Odd Square Room Generator](#room-oddSquare)
 * Utility: [Random Functions](#utility-random)
 * Utility: [Grid Functions](#utility-grid)
+* Utility: [Grid Collection](#utility-gridCollection)
 
 <a name="level-roguelike"></a>
 ## `roguelike/level/roguelike`: Classic Roguelike Level Generator
@@ -1005,3 +1006,61 @@ Returns a boolean of whether or not the two points occupy the same coordinate.
 Returns a new point, `distance` units away from the origin `point`, in the supplied `direction`. The direction must be one of `north`, `east`, `south`, `west`.
 
 Will throw a `TypeError` if the supplied `direction` is invalid.
+
+<a name="utility-gridCollection"></a>
+## `roguelike/utility/gridCollection`: Utility Grid Collection
+
+Useful for creating a collection of dynamic entries associated with a coordinate in a grid. Each entry should have an `.x` and `.y` integer property (if they don't exist they'll be created).
+
+### Usage
+
+```javascript
+const GridCollection = require('roguelike/utility/gridCollection');
+const gc = new GridCollection();
+```
+
+### `gc.add(coord, entry)`
+
+Returns `false` if the entry already exists or if another entry already exists at the same coord otherwise `true` on success.
+
+### `gc.get(coord)`
+
+Returns an entry if one exists, otherwise returns null
+
+### `gc.has(coord)`
+
+Returns `true` if an entry exists at the coordinate or `false` if not.
+
+### `gc.destroyAtCoordinate(coord)`
+
+Attempts to remove an entry at the coordinate. Returns `true` if the operation was successful or `false` if not (e.g. no entry exists).
+
+### `gc.destroy(entry)`
+
+Removes the entry if it exists and returns a `true`, otherwise `false` if it's missing.
+
+### `gc.moveAtCoordinate(oldCoord, newCoord)`
+
+Moves an entry from the old coordinate to the new coordinate, updating `.x` and `.y` properties if applicable. Returns `true` on success or `false` on failure. Will fail if new coordinate is occupied or old coordinate doesn't have an entry.
+
+### `gc.move(entry, coord)`
+
+Moves the entry from its curent location to the specified coordinate. Updates the `.x` and `.y` properties if successful. Returns a `false` if either the entry doesn't exist or the new coord is occupied, otherwise returns `true`.
+
+### `gc.each()`
+
+Returns an iterable representing each of the entries. Can be used like so:
+
+```javascript
+for (let entry of gc.each()) {
+  console.log(entry);
+}
+```
+
+### `gc.clear()`
+
+Clears the collection of all entries. Returns the number of entries cleared in this manner.
+
+### `gc.size()`
+
+Returns the number of entries in the collection.
