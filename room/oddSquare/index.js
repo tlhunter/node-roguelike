@@ -372,6 +372,17 @@ class Generator {
       for (let i = 0; i < this.size; i++) {
         const x = anchor.mode === 'x' ? anchor.value : i;
         const y = anchor.mode === 'y' ? anchor.value : i;
+        if (anchor.mode === 'x' && y === this.center.y) { // Chasm bridge
+          // Prevent some things from blocking path, though adjacent hole can break walkability
+          this.setProtect(x, y);
+          this.freeSpace.destroyAtCoordinate({x, y});
+          continue;
+        } else if (anchor.mode === 'y' && x === this.center.x) { // Chasm bridge
+          // Prevent some things from blocking path, though adjacent hole can break walkability
+          this.setProtect(x, y);
+          this.freeSpace.destroyAtCoordinate({x, y});
+          continue;
+        }
         if (!this.isProtected(x, y) && !this.layers.composite[y][x].wall) {
           this.layers.floor[y][x] = FLOOR.CHASM;
           this.layers.composite[y][x].chasm = true;
