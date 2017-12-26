@@ -117,7 +117,7 @@ class Generator {
     this.circle = !!opts.circle;
     this.gashes = Number(opts.gashes);
     this.litter = opts.litter;
-    this.decor = opts.decor && opts.decor.length ? opts.decor : false;
+    this.decor = opts.decor && opts.decor.length ? opts.decor : [];
 
     this.center = {
       x: Math.floor(this.size / 2),
