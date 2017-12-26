@@ -179,6 +179,7 @@ class Generator {
             this.layers.composite[y][x].block = BLOCK.FALL;
           }
         } else if (this.chasm && (y === 0 || x === 0 || y === this.size-1 || x === this.size-1)) {
+          // TODO: What is going on here?
           this.layers.floor[y][x] = FLOOR.CHASM;
           this.layers.composite[y][x].block = BLOCK.FALL;
           this.layers.composite[y][x].bridge = true;
@@ -372,7 +373,24 @@ class Generator {
       for (let i = 0; i < this.size; i++) {
         const x = anchor.mode === 'x' ? anchor.value : i;
         const y = anchor.mode === 'y' ? anchor.value : i;
-        if (!this.isProtected(x, y) && !this.layers.composite[y][x].wall) {
+        if (this.isProtected(x, y)) continue;
+        if (anchor.mode === 'x' && y === this.center.y) {
+          // Add a horizontal bridge
+          if (x === 0 || x === this.size-1 || this.layers.floor[y][x+1] === FLOOR.CHASM || this.layers.floor[y][x+1] === FLOOR.CHASM) {
+            continue; // Nothing to bridge
+          }
+          this.layers.floor[y][x] = FLOOR.BRIDGE;
+          this.layers.composite[y][x].bridge = 'h'
+          this.freeSpace.destroyAtCoordinate({x, y});
+        } else if (anchor.mode === 'y' && x === this.center.x) {
+          // Add a vertical bridge
+          if (y === 0 || y === this.size-1 || this.layers.floor[y-1][x] === FLOOR.CHASM || this.layers.floor[y+1][x] === FLOOR.CHASM) {
+            continue; // Nothing to bridge
+          }
+          this.layers.floor[y][x] = FLOOR.BRIDGE;
+          this.layers.composite[y][x].bridge = 'v';
+          this.freeSpace.destroyAtCoordinate({x, y});
+        } else if (!this.isProtected(x, y) && !this.layers.composite[y][x].wall) {
           this.layers.floor[y][x] = FLOOR.CHASM;
           this.layers.composite[y][x].chasm = true;
           this.layers.composite[y][x].block = BLOCK.FALL;

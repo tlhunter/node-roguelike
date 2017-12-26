@@ -4,15 +4,15 @@ const colors = require('colors/safe');
 
 const Gen = require('../../room/oddSquare/index.js');
 
-makeRoom('A1', 17, true, true, 0.25, false);
-makeRoom('E3', 7, false, false, 0.5, false, true, 1, true);
-makeRoom('C1', 11, false, true, 0.1, false);
-makeRoom('F1', 5, false, false, 0, false);
-makeRoom('E4', 13, false, true, 0.2, true, false, 0, true);
-makeRoom('C1', 11, false, true, 0.3, true, true, 2, true);
-//makeRoom('C2', 21, false, true, 0.1, true, true, 3);
+//makeRoom('A1', 17, true, 0.25, false);
+//makeRoom('E3', 7, false, 0.5, false, true, 1, true);
+//makeRoom('C1', 11, true, 0.1, false);
+//makeRoom('F1', 5, false, 0, false);
+//makeRoom('E4', 13, true, 0.2, true, false, 0, true);
+makeRoom('D1', 11, true, 0.3, true, true, 3, true);
+//makeRoom('C2', 21, true, 0.1, true, true, 3);
 
-function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, decor) {
+function makeRoom(type, size, treasure, litter, chasm, circle, gashes, decor) {
   const start = Date.now();
   const gen = new Gen({
     size
@@ -20,7 +20,6 @@ function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, 
 
   const room = gen.generate({
     type,
-    pillars,
     treasure,
     litter,
     chasm,
@@ -31,7 +30,7 @@ function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, 
       {id: 'desk', count: 1, location: 'central'},
       {id: 'books', rate: 0.05, location: 'edge'}
     ] : undefined,
-    holes: chasm
+    holes: false
   });
 
   const end = Date.now() - start;
@@ -41,6 +40,7 @@ function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, 
     for (let x = 0; x < room.size.width; x++) {
       let mid = room.layers.mid[y][x];
       let floor = room.layers.floor[y][x];
+      let composite = room.layers.composite[y][x];
       let char;
       if (mid === 'wall') {
         char = '#';
@@ -59,19 +59,24 @@ function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, 
           char = ',';
         } else if (floor === 'chasm') {
           char = ' ';
+        } else if (floor === 'bridge') {
+          if (composite.bridge === 'h') {
+            char = '-';
+          } else if (composite.bridge === 'v') {
+            char = '|';
+          }
         } else {
           char = '.';
         }
       }
 
-      let c = room.layers.composite[y][x];
-      if (c.protected) {
+      if (composite.protected) {
         char = colors.inverse(char);
       }
 
-      if (c.block === 'special' ) {
+      if (composite.block === 'special' ) {
           char = colors.cyan(char);
-      } else if (c.block === true) {
+      } else if (composite.block === true) {
         char = colors.red(char);
       }
 
