@@ -947,6 +947,16 @@ const random = require('roguelike/utility/random');
 
 Returns an array where the element order has been randomized
 
+### `random.shift(array)`
+
+Maintains the order of array elements but randomly shifts them. As an example:
+
+```javascript
+let result = random.shift([1,2,3,4,5,6]);
+console.log(result);
+// [4,5,6,1,2,3]
+```
+
 ### `random.range(minInteger, maxInteger)`
 
 Returns an integer between the supplied integers, inclusive.

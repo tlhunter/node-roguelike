@@ -1,8 +1,20 @@
 module.exports = {
+  /**
+   * Clones and sorts an array randomly
+   */
   shuffle(arr) {
     let res = arr.slice(0);
     for (let j, x, i = res.length; i; j = Math.floor(Math.random() * i), x = res[--i], res[i] = res[j], res[j] = x);
     return res;
+  },
+
+  /**
+   * Clones an array, keeps order but shifts the results. E.g.
+   * 0,1,2,3 -> 2,3,0,1
+   */
+  shift(arr) {
+    let res = arr.slice(0);
+    return res.splice(this.range(0, res.length)).concat(res);
   },
 
   /**
