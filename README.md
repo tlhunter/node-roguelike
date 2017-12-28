@@ -825,7 +825,11 @@ const room = gen.generate({
     {id: 'cobweb', rate: 0.1, location: 'any'}, // 10% of free tiles will be cobweb
     {id: 'desk', count: 1, location: 'central'}, // 1 free tile not by a chasm will be a desk
     {id: 'books', rate: 0.05, location: 'edge'} // 5% of free tiles by chasm will be books
-  ]
+  ],
+  focalpoint: { // Force focalpoint to be a certain coordinate, otherwise random
+    x: 3,
+    y: 4
+  }
 });
 ```
 

@@ -124,7 +124,7 @@ class Generator {
       y: Math.floor(this.size / 2)
     };
 
-    this.focalpoint = {
+    this.focalpoint = opts.focalpoint ? opts.focalpoint : {
       x: random.range(2, this.size - 3),
       y: random.range(2, this.size - 3)
     };

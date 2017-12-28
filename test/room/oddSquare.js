@@ -9,10 +9,10 @@ makeRoom('E3', 7, false, false, 0.5, false, true, 1, true);
 makeRoom('C1', 11, false, true, 0.1, false);
 makeRoom('F1', 5, false, false, 0, false);
 makeRoom('E4', 13, false, true, 0.2, true, false, 0, true);
-makeRoom('C1', 11, false, true, 0.3, true, true, 2, true);
+makeRoom('C1', 11, false, true, 0.3, true, true, 2, true, true);
 //makeRoom('C2', 21, false, true, 0.1, true, true, 3);
 
-function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, decor) {
+function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, decor, makecenter) {
   const start = Date.now();
   const gen = new Gen({
     size
@@ -31,7 +31,8 @@ function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, 
       {id: 'desk', count: 1, location: 'central'},
       {id: 'books', rate: 0.05, location: 'edge'}
     ] : undefined,
-    holes: chasm
+    holes: chasm,
+    focalpoint: makecenter ? {x: Math.floor(size/2), y: Math.floor(size/2)} : undefined
   });
 
   const end = Date.now() - start;
