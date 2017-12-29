@@ -502,10 +502,10 @@ class MazeKeyGen {
 
     room.exit = true;
 
-    if (room.doors.n) this.doors[room.doors.n].exit = true;
-    if (room.doors.e) this.doors[room.doors.e].exit = true;
-    if (room.doors.s) this.doors[room.doors.s].exit = true;
-    if (room.doors.w) this.doors[room.doors.w].exit = true;
+    if (room.doors.n !== null) this.doors[room.doors.n].exit = true;
+    if (room.doors.e !== null) this.doors[room.doors.e].exit = true;
+    if (room.doors.s !== null) this.doors[room.doors.s].exit = true;
+    if (room.doors.w !== null) this.doors[room.doors.w].exit = true;
 
     this.exit = roomId;
   }
