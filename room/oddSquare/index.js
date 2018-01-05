@@ -16,7 +16,7 @@ const DEFAULTS = {
   treasure: false,
   litter: 0.0,
   chasm: false,
-  holes: false,
+  holes: 0,
   circle: false,
   decor: false, // TODO: Support destructable decor which can be placed on non-doorstop-protected tiles
   gashes: 0
@@ -117,6 +117,7 @@ class Generator {
     this.circle = !!opts.circle;
     this.gashes = Number(opts.gashes);
     this.litter = opts.litter;
+    this.holes = opts.holes;
     this.decor = opts.decor && opts.decor.length ? opts.decor : [];
 
     this.center = {
@@ -394,10 +395,10 @@ class Generator {
   }
 
   addHoles() {
-    let holes = this.size - 2; // Amount of holes is square root of area (minus outer walls)
+    let holes = this.holes;
     let limit = this.size * 3; // how many passes before we give up
     while (holes > 0 && limit > 0) {
-      let x = random.range(0, this.size-1);
+      let x = random.range(0, this.size-1); // TODO: iterate over freespace instead of guessing
       let y = random.range(0, this.size-1);
       if (!this.isProtected(x, y) && !this.isBlocked(x, y)) {
         holes--;

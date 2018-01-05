@@ -31,7 +31,7 @@ function makeRoom(type, size, pillars, treasure, litter, chasm, circle, gashes, 
       {id: 'desk', count: 1, location: 'central'},
       {id: 'books', rate: 0.05, location: 'edge'}
     ] : undefined,
-    holes: chasm,
+    holes: chasm ? 3 : 0,
     focalpoint: makecenter ? {x: Math.floor(size/2), y: Math.floor(size/2)} : undefined
   });
 

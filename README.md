@@ -818,7 +818,7 @@ const room = gen.generate({
   treasure: true,
   litter: 0.25, // 25% of free space (after decor) will be litter
   chasm: true, // Surroundings is "emptyness" as opposed to walls
-  holes: true, // Adds random holes
+  holes: 3, // Adds random holes (defaults to 0)
   circle: true, // Generates a circular room, must be combined with chasm
   gashes: 2, // Number of gashes (empty lines) to add
   decor: [ // Add blocking decoration to the map
