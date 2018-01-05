@@ -1,6 +1,6 @@
 {
   "name": "roguelike",
-  "version": "0.4.6",
+  "version": "0.5.0",
   "description": "Generate 2D levels",
   "main": "index.js",
   "directories": {
