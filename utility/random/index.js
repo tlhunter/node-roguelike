@@ -28,19 +28,17 @@ module.exports = {
 
   /**
    * Get a random element from an array
-   * TODO: Rename 'element'
    */
-  randomElement(arr) {
+  element(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   },
 
   /**
-   * Like randomElement(), but with matching weight array
+   * Like element(), but with matching weight array
    *
    * Usage: fn([1,2,3,4], [50, 100, 50, 10]);
-   * TODO: Rename 'elementWeighted'
    */
-  randomElementWeighted(collection, weights) {
+  elementWeighted(collection, weights) {
     if (collection.length !== weights.length) {
       return null;
     }

@@ -965,16 +965,16 @@ console.log(result);
 
 Returns an integer between the supplied integers, inclusive.
 
-### `random.randomElement(array)`
+### `random.element(array)`
 
 Returns a random element from the given array.
 
-### `random.randomElementWeighted(array, weightArray)`
+### `random.elementWeighted(array, weightArray)`
 
 Returns a random element from `array`, based on the weights provided in `weightArray`. As an example, consider the following:
 
 ```javascript
-let result = random.randomElementWeighted(['A', 'B'], [1, 2]);
+let result = random.elementWeighted(['A', 'B'], [1, 2]);
 console.log(result);
 // result is 33% likely to be A and 67% likely to be B
 ```
