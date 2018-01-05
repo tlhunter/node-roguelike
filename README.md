@@ -979,6 +979,17 @@ console.log(result);
 // result is 33% likely to be A and 67% likely to be B
 ```
 
+### `random.dice(diceSyntax, allowNegative=false)`
+
+Returns the result of a dice roll. By defaultl negative numbers are not allowed unless the second parameter is set to `true`. Here are some example dice syntaxes:
+
+* `d6`: 1 -> 6, evenly spread
+* `1d4`: 1 -> 4, evenly spread
+* `2d8`: 2 -> 16, mostly 9
+* `1d3 + 2`: 3 -> 5, evenly spread
+* `2d7-7`: 0 -> 7, mostly 0
+* `20`: always 20
+
 ### `random.decide(floatThreshold)`
 
 Makes a decision (returns a boolean) based on the supplied `floatThreshold`. Here's an example:

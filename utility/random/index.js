@@ -1,3 +1,5 @@
+const DICE = /^(?:(\d+)?d(\d+))?\s*([\+\-])?\s*(\d+)?$/;
+
 module.exports = {
   /**
    * Clones and sorts an array randomly
@@ -26,6 +28,7 @@ module.exports = {
 
   /**
    * Get a random element from an array
+   * TODO: Rename 'element'
    */
   randomElement(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -35,6 +38,7 @@ module.exports = {
    * Like randomElement(), but with matching weight array
    *
    * Usage: fn([1,2,3,4], [50, 100, 50, 10]);
+   * TODO: Rename 'elementWeighted'
    */
   randomElementWeighted(collection, weights) {
     if (collection.length !== weights.length) {
@@ -66,6 +70,50 @@ module.exports = {
     }
 
     return collection[element];
+  },
+
+  /**
+   * Simulates a dice roll. E.g. 3d8 - 4
+   * Accepts: d6, 1d6, 1d6+1, 1d6-1
+   * Also accepts constants: -3, 17
+   * Whitespace will be stripped out
+   * Operators allowed are + and - only.
+   */
+  dice(syntax, allowNegative = false) {
+    const result = DICE.exec(syntax);
+
+    if (!result) {
+      throw new TypeError(`Invalid dice syntax: ${syntax}`);
+    }
+
+
+    let [, count, size, operator, mod] = result;
+
+    size = Number(size) || 0;
+    count = Number(count) || 0;
+    mod = Number(mod) || 0;
+
+    if (!count && size) count = 1;
+
+    let total = 0;
+
+    if (size) {
+      for (let i = 0; i < count; i++) {
+        total += this.range(1, size);
+      }
+    }
+
+    if (!operator && mod || operator === '+') {
+      total += mod;
+    } else if (operator === '-') {
+      total -= mod;
+    }
+
+    if (total < 0 && !allowNegative) {
+      total = 0;
+    }
+
+    return total;
   },
 
   /**
