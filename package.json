@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/tlhunter/node-roguelike#readme",
   "dependencies": {
-    "random-seed-class": "^0.0.1",
     "seed-random": "^2.2.0"
   }
 }
