@@ -1,13 +1,59 @@
 const DICE = /^(?:(\d+)?d(\d+))?\s*([\+\-])?\s*(\d+)?$/;
 
+const rand = require("seed-random");
+class Random{
+    constructor(options={}){
+        this.options = options;
+        this.rnd = rand(options.seed || 'default');
+    }
+    
+    ratio(){
+        return this.rnd();
+    }
+    
+    float(upperBound=Number.MAX_VALUE, lowerBound=0){
+        const delta = upperBound - lowerBound;
+        return lowerBound + delta * this.rnd();
+    }
+    
+    integer(upperBound=Math.floor(Number.MAX_VALUE), lowerBound=0){
+        return Math.floor(this.float(upperBound, lowerBound));
+    }
+    
+    array(array){
+        return array[this.integer(array.length)];
+    }
+    
+    string(parts, max){
+        const numParts = this.integer(max);
+        let lcv=0;
+        let result = '';
+        for(;lcv < numParts; lcv++){
+            result += this.array(parts);
+        }
+        return result;
+    }
+    
+}
+
+let randomInstance = new Random();
+
 module.exports = {
   /**
    * Clones and sorts an array randomly
    */
   shuffle(arr) {
     let res = arr.slice(0);
-    for (let j, x, i = res.length; i; j = Math.floor(Math.random() * i), x = res[--i], res[i] = res[j], res[j] = x);
+    for (let j, x, i = res.length; i; j = Math.floor(randomInstance.float() * i), x = res[--i], res[i] = res[j], res[j] = x);
     return res;
+  },
+  
+  random(){ //simple Math.random() replacement
+    return randomInstance.ratio();
+  },
+  
+  seed(seed){
+    randomInstance = new Random(seed);
   },
 
   /**
@@ -23,14 +69,14 @@ module.exports = {
    * Get a random integer between min and max, inclusive
    */
   range(min, max) {
-    return Math.floor(Math.random() * ((max+1) - min)) + min;
+    return Math.floor(randomInstance.float() * ((max+1) - min)) + min;
   },
 
   /**
    * Get a random element from an array
    */
   element(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+    return arr[Math.floor(randomInstance.float() * arr.length)];
   },
 
   /**
@@ -53,7 +99,7 @@ module.exports = {
       weights[i] = total;
     }
 
-    let strata = Math.random() * total;
+    let strata = randomInstance.float() * total;
     let element = null;
 
     for (let i = 0; i < weights.length; i++) {
@@ -126,6 +172,6 @@ module.exports = {
       return false;
     }
 
-    return Math.random() <= threshold;
+    return randomInstance.float() <= threshold;
   }
 };

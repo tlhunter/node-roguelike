@@ -1,3 +1,4 @@
+const rand = require('../../utility/random/index.js');
 var TILE = {
   VOID: 0,
   FLOOR: 1,
@@ -485,7 +486,7 @@ module.exports = function(config) {
 };
 
 function shuffle(o) {
-  for (var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  for (var j, x, i = o.length; i; j = Math.floor(rand.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
 }
 
 /**
@@ -496,7 +497,7 @@ function random(min_raw, max_raw) {
   var min = Math.floor(min_raw);
   var max = Math.floor(max_raw);
 
-  return Math.floor(Math.random() * (max + 1 - min) + min);
+  return Math.floor(rand.random() * (max + 1 - min) + min);
 }
 
 /**
@@ -522,7 +523,7 @@ function randomOdd(min_raw, max_raw) {
   min /= 2;
   max /= 2;
 
-  var result = Math.floor(Math.random() * (max + 1 - min) + min);
+  var result = Math.floor(rand.random() * (max + 1 - min) + min);
 
   result *= 2;
   result += 1;

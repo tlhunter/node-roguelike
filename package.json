@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/tlhunter/node-roguelike/issues"
   },
-  "homepage": "https://github.com/tlhunter/node-roguelike#readme"
+  "homepage": "https://github.com/tlhunter/node-roguelike#readme",
+  "dependencies": {
+    "seed-random": "^2.2.0"
+  }
 }
