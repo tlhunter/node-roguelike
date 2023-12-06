@@ -5,6 +5,9 @@
  * Modernized on November 19, 2017
  * Originally hosted at https://github.com/PhobosRising/javascript-roguelike-map-generator
  */
+ 
+const rand = require('../../utility/random/index.js');
+ 
 const WALL = 'wall';
 const DOOR = 'door';
 const OPEN = 'open';
@@ -135,28 +138,28 @@ module.exports = (config = {}) => {
 
         // South
         comparedZone = map[coords.y+1][coords.x];
-        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
+        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && rand.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x, y: coords.y+1});
           new_door_count++;
         }
 
         // North
         comparedZone = map[coords.y-1][coords.x];
-        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
+        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && rand.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x, y: coords.y-1});
           new_door_count++;
         }
 
         // West
         comparedZone = map[coords.y][coords.x-1];
-        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
+        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && rand.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x-1, y: coords.y});
           new_door_count++;
         }
 
         // East
         comparedZone = map[coords.y][coords.x+1];
-        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && Math.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
+        if (comparedZone.open && Math.abs(comparedZone.room - this_room_id) > ROOM_ID_DIFF_RANDOM_DOOR_THRESHOLD && rand.random() <= ROOM_ID_DIFF_RANDOM_DOOR_ODDS) {
           buildDoorBetweenZones(map, coords, {x: coords.x+1, y: coords.y});
           new_door_count++;
         }
@@ -281,7 +284,7 @@ module.exports = (config = {}) => {
 
 // Get a random integer between the supplied min and max
 function rangedRandom(min, max) {
-  return Math.floor((Math.random() * (max + 1 - min)) + min);
+  return Math.floor((rand.random() * (max + 1 - min)) + min);
 }
 
 // Builds a door between these two (hopefully) adjacent zones
@@ -316,7 +319,7 @@ function shuffle(array) {
   let i = arr.length, j, tempi, tempj;
   if ( i == 0 ) return false;
   while ( --i ) {
-   j     = Math.floor( Math.random() * ( i + 1 ) );
+   j     = Math.floor( rand.random() * ( i + 1 ) );
    tempi   = arr[i];
    tempj   = arr[j];
    arr[i] = tempj;

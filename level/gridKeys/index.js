@@ -2,6 +2,8 @@ const MAX_X = 201;
 const MAX_Y = 201;
 const DIR = ['n', 'e', 's', 'w'];
 
+const rand = require('../../utility/random/index.js');
+
 class MazeKeyGen {
   constructor({rooms, keys}) {
     this.maxRooms = rooms;
@@ -63,27 +65,27 @@ class MazeKeyGen {
     const root = this.addRoom(this.seed.x, this.seed.y);
 
     for (let i = 0; i < this.maxRooms - 1; i++) {
-      let dir = DIR[Math.floor(Math.random() * DIR.length)]; // Which direction are we adding a room from
+      let dir = DIR[Math.floor(rand.random() * DIR.length)]; // Which direction are we adding a room from
 
       let x, y, parentRoom;
 
       if (dir === 'n') { // Sliding southward from north
-        x = Math.floor(Math.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
+        x = Math.floor(rand.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
         const parentRoomId = this.furthest.n.get(x);
         parentRoom = this.rooms[parentRoomId];
         y = parentRoom.y - 1;
       } else if (dir === 'e') { // Sliding westward from east
-        y = Math.floor(Math.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
+        y = Math.floor(rand.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
         const parentRoomId = this.furthest.e.get(y);
         parentRoom = this.rooms[parentRoomId];
         x = parentRoom.x + 1;
       } else if (dir === 's') { // Sliding northward from south
-        x = Math.floor(Math.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
+        x = Math.floor(rand.random() * (this.bounds.e - this.bounds.w)) + this.bounds.w;
         const parentRoomId = this.furthest.s.get(x);
         parentRoom = this.rooms[parentRoomId];
         y = parentRoom.y + 1;
       } else if (dir === 'w') { // Sliding eastward from west
-        y = Math.floor(Math.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
+        y = Math.floor(rand.random() * (this.bounds.s - this.bounds.n)) + this.bounds.n;
         const parentRoomId = this.furthest.w.get(y);
         parentRoom = this.rooms[parentRoomId];
         x = parentRoom.x - 1;
